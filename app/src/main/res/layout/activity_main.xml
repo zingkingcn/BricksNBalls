@@ -1,18 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.zingking.bricks.MainActivity">
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             tools:context="com.zingking.bricks.MainActivity">
 
     <FrameLayout
-        android:layout_marginTop="30dp"
-        android:layout_marginLeft="30dp"
-        android:id="@+id/fl_container"
-        android:layout_width="300dp"
-        android:layout_height="400dp"
-        android:background="#454545"/>
-
+            android:layout_marginTop="30dp"
+            android:layout_marginLeft="30dp"
+            android:id="@+id/fl_container"
+            android:layout_width="300dp"
+            android:layout_height="400dp"
+            android:background="#454545"/>
+    <Button
+            android:id="@+id/btn_change"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="bottom"
+            android:text="CHANGE"
+            android:onClick="btnClick"/>
 
 </FrameLayout>
