@@ -3,6 +3,7 @@ package com.zingking.bricks;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -42,10 +43,9 @@ public class MainActivity extends Activity {
         backgroundView.setDrawListener(new IDrawListener() {
             @Override
             public void onSuccess() {
-                int horizontalNum = backgroundView.getHorizontalNum();
-                int verticalNum = backgroundView.getVerticalNum();
-                brickPosition = new int[horizontalNum - 1][verticalNum - 1];
-                createBrickPosition();
+                if (brickPosition == null) {
+                    createBrickPosition();
+                }
                 drawBrickByLevel();
             }
 
@@ -70,11 +70,20 @@ public class MainActivity extends Activity {
         final float[] xPositions = backgroundView.getXPositions();// x轴点的数量和 列位置参数(数组长度为数量，值为位置参数)
         final float[] yPositions = backgroundView.getYPositions();// y轴点的数量和 行位置参数
         final Context context = this;
-
-        // 竖着画(先遍历xPositions)
-        for (int xCoordinate = 0, xLen = xPositions.length - 1; xCoordinate < xLen; xCoordinate++) {
-            for (int yCoordinate = 0, yLen = yPositions.length - 1; yCoordinate < yLen; yCoordinate++) {
-                // 第 yCoordinate 行，第 xCoordinate 列
+        int yNum = yPositions.length;// y轴砖块数据点的数量
+        int xNum = xPositions.length;// x轴砖块数据点的数量
+        // 遍历砖块样式
+        for (int yCoordinate = 0, yLen = brickPosition.length; yCoordinate < yLen; yCoordinate++) {
+            if (yNum - 1 != yLen) {
+                Log.e(TAG, "drawBrickByLevel 砖块有 " + yLen + " 行，砖块数据有 " + yNum + "组.");
+                continue;
+            }
+            int xLen = brickPosition[yCoordinate].length;
+            if (xNum - 1 != xLen) {
+                Log.e(TAG, "drawBrickByLevel 砖块有 " + xLen + " 列，砖块数据有 " + xNum + "组.");
+                continue;
+            }
+            for (int xCoordinate = 0; xCoordinate < xLen; xCoordinate++) {
                 if (brickPosition[yCoordinate][xCoordinate] == 1) {
                     BrickView ballView = new BrickView(context);
                     ballView.setLtPosition(new float[]{xPositions[xCoordinate] + 3f, yPositions[yCoordinate] + 3f});
@@ -82,20 +91,22 @@ public class MainActivity extends Activity {
                     flContainer.addView(ballView);
                 }
             }
+        }
+    }
 
-//        // 先画横格(y轴的位置不变，先遍历yPositions)
-//        for (int i = 0, yLen = yPositions.length - 1; i < yLen; i++) {
-//            for (int j = 0, xLen = xPositions.length - 1; j < xLen; j++) {
-//                if (brickPosition[i][j] == 1) {
-//                    BrickView ballView = new BrickView(this);
-//                    ballView.setLtPosition(new float[]{xPositions[j] + 3f, yPositions[i] + 3f});
-//                    ballView.setRbPosition(new float[]{xPositions[j + 1] - 3f, yPositions[i + 1] - 3f});
+        // 遍历数据，竖着画(先遍历xPositions)
+//        for (int xCoordinate = 0, xLen = xPositions.length - 1; xCoordinate < xLen; xCoordinate++) {
+//            for (int yCoordinate = 0, yLen = yPositions.length - 1; yCoordinate < yLen; yCoordinate++) {
+//                // 第 yCoordinate 行，第 xCoordinate 列
+//                if (brickPosition[yCoordinate][xCoordinate] == 1) {
+//                    BrickView ballView = new BrickView(context);
+//                    ballView.setLtPosition(new float[]{xPositions[xCoordinate] + 3f, yPositions[yCoordinate] + 3f});
+//                    ballView.setRbPosition(new float[]{xPositions[xCoordinate + 1] - 3f, yPositions[yCoordinate + 1]
+//                            - 3f});
 //                    flContainer.addView(ballView);
 //                }
 //            }
 //        }
-        }
-    }
 
     private void drawBrickByRandom(){
         pointXList.clear();
