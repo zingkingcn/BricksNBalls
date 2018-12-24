@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PointF;
 import android.util.Log;
 import android.view.View;
 
@@ -19,11 +20,12 @@ public class BricksBackgroundView extends View {
     private static final String TAG = "BricksBackgroundView";
 
     private Paint paint;
-    private Paint textPaint;
     private Canvas canvas;
     private int padding = 60;
     private int width;
     private int height;
+    private PointF pointPosition = new PointF();
+    private PointF linePosition = new PointF();
     /**
      *
      */
@@ -56,11 +58,7 @@ public class BricksBackgroundView extends View {
     private void init() {
         paint = new Paint();
         paint.setStrokeWidth(6);
-        paint.setColor(Color.parseColor("#0000ffff"));
-
-        textPaint = new Paint();
-        textPaint.setStrokeWidth(1);
-        textPaint.setColor(Color.parseColor("#00FFFF"));
+        paint.setColor(Color.parseColor("#00ffff"));
     }
 
     @Deprecated
@@ -97,13 +95,29 @@ public class BricksBackgroundView extends View {
         this.iDrawListener = iDrawListener;
     }
 
+    public PointF getPointPosition() {
+        return pointPosition;
+    }
+
+    public void setPointPosition(PointF pointPosition) {
+        if (pointPosition != null) {
+            this.pointPosition.set(pointPosition);
+            invalidate();
+        }
+    }
+
+    public void setLinePosition(PointF linePosition) {
+        if (linePosition != null) {
+            this.linePosition.set(linePosition);
+            invalidate();
+        }
+    }
 
     @Override
     protected void onDraw(Canvas canvas) {
         Log.d(TAG, "onDraw() called with: canvas = [" + canvas + "]");
         super.onDraw(canvas);
         this.canvas = canvas;
-        canvas.drawLine(100, 100, 100, 300, textPaint);
         width = getWidth();
         height = getHeight();
         if (horizontalNum != 0) {
@@ -116,11 +130,17 @@ public class BricksBackgroundView extends View {
             if (iDrawListener != null) {
                 iDrawListener.onSuccess();
             }
-        }else {
+        } else {
             if (iDrawListener != null) {
                 iDrawListener.onFailed();
             }
         }
+        drawBallLine();
+        canvas.drawCircle(pointPosition.x, pointPosition.y, 50, paint);
+    }
+
+    private void drawBallLine() {
+        canvas.drawLine(0, 0, linePosition.x, linePosition.y, paint);
     }
 
     private void drawByVerticalNum() {

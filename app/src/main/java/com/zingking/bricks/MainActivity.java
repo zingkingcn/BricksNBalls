@@ -2,12 +2,16 @@ package com.zingking.bricks;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.PointF;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import com.zingking.bricks.entity.MathPoint;
 import com.zingking.bricks.widget.BrickView;
 import com.zingking.bricks.widget.BricksBackgroundView;
 import com.zingking.bricks.widget.GameLevelUtils;
@@ -29,6 +33,12 @@ public class MainActivity extends Activity {
     private List<Integer> pointYList = new ArrayList<>();
 
     private int[][] brickPosition;
+    private float currTouchX = 0;
+    private float currTouchY = 0;
+    private float lastTouchX = 0;
+    private float lastTouchY = 0;
+    private Thread thread;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +57,7 @@ public class MainActivity extends Activity {
                     createBrickPosition();
                 }
                 drawBrickByLevel();
+                backgroundView.bringToFront();
             }
 
             @Override
@@ -54,12 +65,163 @@ public class MainActivity extends Activity {
 
             }
         });
+        backgroundView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+                Log.d(TAG, "dispatchTouchEvent() called with: event = [" + event + "]");
+                int action = event.getAction();
+                switch (action) {
+                    case MotionEvent.ACTION_DOWN:
+                        if (isDrawing) {
+                            break;
+                        }
+                        currTouchX = 0;
+                        currTouchY = 0;
+                        float x = event.getX();
+                        float y = event.getY();
+                        if (x >= 0 && x <= view.getWidth()){
+                            currTouchX = x;
+                            lastTouchX = currTouchX;
+                        }else {
+                            currTouchX = lastTouchX;
+                        }
+                        if (y >= 0 && y <= view.getHeight()) {
+                            currTouchY = y;
+                            lastTouchY = currTouchY;
+                        }else {
+                            currTouchY = lastTouchY;
+                        }
+                        backgroundView.setLinePosition(new PointF(x, y));
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        if (isDrawing) {
+                            break;
+                        }
+                        x = event.getX();
+                        y = event.getY();
+                        if (x >= 0 && x <= view.getWidth()){
+                            currTouchX = x;
+                            lastTouchX = currTouchX;
+                        }else {
+                            currTouchX = lastTouchX;
+                        }
+                        if (y >= 0 && y <= view.getHeight()) {
+                            currTouchY = y;
+                            lastTouchY = currTouchY;
+                        }else {
+                            currTouchY = lastTouchY;
+                        }
+                        backgroundView.setLinePosition(new PointF(x, y));
+                        break;
+                    case MotionEvent.ACTION_OUTSIDE:
+                        Log.i(TAG, "dispatchTouchEvent: 超界");
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        Log.i(TAG, "onTouch: currTouchX = " + currTouchX);
+                        Log.i(TAG, "onTouch: currTouchY = " + currTouchY);
+                        if (currTouchX > 0 && currTouchY > 0) {
+                            angle = Math.atan(currTouchY / (double)currTouchX) / Math.PI * 180;
+                            startAutoMove();
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                return true;
+            }
+        });
         backgroundView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
-        flContainer.addView(backgroundView);
-        // backgroundView.setHorizontalNum(HORIZONTAL_NUM);
-        backgroundView.setVerticalNum(VERTICAL_NUM);
+        flContainer.addView(backgroundView, -1);
+         backgroundView.setHorizontalNum(HORIZONTAL_NUM);
+//        backgroundView.setVerticalNum(VERTICAL_NUM);
         backgroundView.setPadding(PADDING);
+    }
+
+    private final Object object = new Object();
+    boolean isDrawing = false;
+    private boolean isRun = false;
+    private double angle = 0;
+    double moveY = 0;
+    double moveX = 0;
+    private boolean isRight = true;
+    private boolean isDown = true;
+    private void startAutoMove() {
+        moveY  = Math.sin(angle * Math.PI / 180) * 100;
+        moveX = Math.cos(angle * Math.PI / 180) * 100;
+        if (isDrawing) {
+            return;
+        }
+        final PointF pointF = new PointF(0, 100);
+        synchronized (object) {
+            object.notify();
+        }
+        if (thread == null) {
+            thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (true) {
+                        try {
+                            Log.i(TAG, "run: pointF =  " + pointF.toString());
+                            if (pointF.y < 0) {
+                                synchronized (object) {
+                                    isDrawing = false;
+                                    isRight = true;
+                                    isDown = true;
+                                    pointF.x = -1;
+                                    pointF.y = -1;
+                                    object.wait();
+                                }
+                            }
+                            Thread.sleep(16);
+//                            if (pointF.x <= currTouchX) {
+//                                pointF.x += moveX;
+//                            }
+                            if (isRight){
+                                if (pointF.x <= backgroundView.getWidth()) {
+                                    pointF.x += moveX;
+                                }else {
+                                    isRight = false;
+                                }
+                            } else {
+                                if (pointF.x > 0) {
+                                    pointF.x -= moveX;
+                                } else {
+                                    pointF.x = 0;
+                                    isRight = true;
+                                }
+                            }
+//                            if (pointF.y <= currTouchY) {
+//                                pointF.y += moveY;
+//                            }
+                            if (isDown) {
+                                if (pointF.y <= backgroundView.getHeight()) {
+                                    pointF.y += moveY;
+                                } else {
+                                    isDown = false;
+                                }
+                            } else {
+                                if (pointF.y > 0) {
+                                    pointF.y -= moveY;
+                                } else {
+                                    pointF.y = 0;
+                                    isDown = true;
+                                }
+                            }
+                            backgroundView.setPointPosition(pointF);// FIXME: 2018/12/25 这里会导致整个ui重绘
+                            // TODO: 2018/12/25 优化小球绘制 by Z.kai
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
+        }
+        if (!isRun) {
+            thread.start();
+            isRun = true;
+        }
+        isDrawing = true;
     }
 
     private void createBrickPosition() {
@@ -85,9 +247,13 @@ public class MainActivity extends Activity {
             }
             for (int xCoordinate = 0; xCoordinate < xLen; xCoordinate++) {
                 if (brickPosition[yCoordinate][xCoordinate] == 1) {
+                    MathPoint mathPoint = new MathPoint(yCoordinate, xCoordinate);
+                    mathPoint.setRange(xPositions[xCoordinate] + 3f, yPositions[yCoordinate] + 3f,
+                            xPositions[xCoordinate + 1] - 3f, yPositions[yCoordinate + 1] - 3f);
                     BrickView ballView = new BrickView(context);
-                    ballView.setLtPosition(new float[]{xPositions[xCoordinate] + 3f, yPositions[yCoordinate] + 3f});
-                    ballView.setRbPosition(new float[]{xPositions[xCoordinate + 1] - 3f, yPositions[yCoordinate + 1] - 3f});
+                    ballView.setMathPoint(mathPoint);
+//                    ballView.setLtPosition(new float[]{xPositions[xCoordinate] + 3f, yPositions[yCoordinate] + 3f});
+//                    ballView.setRbPosition(new float[]{xPositions[xCoordinate + 1] - 3f, yPositions[yCoordinate + 1] - 3f});
                     flContainer.addView(ballView);
                 }
             }
@@ -132,9 +298,13 @@ public class MainActivity extends Activity {
                 if (pointXList.contains(i) && pointYList.contains(j)) {
                     pointXList.remove(Integer.valueOf(i));
                     pointYList.remove(Integer.valueOf(j));
+                    MathPoint mathPoint = new MathPoint(i, j);
+                    mathPoint.setRange(xPositons[j] + 3f, yPositons[i] + 3f,
+                            xPositons[j + 1] - 3f, yPositons[i + 1] - 3f);
                     BrickView ballView = new BrickView(this);
-                    ballView.setLtPosition(new float[]{xPositons[j] + 3f, yPositons[i] + 3f});
-                    ballView.setRbPosition(new float[]{xPositons[j + 1] - 3f, yPositons[i + 1] - 3f});
+                    ballView.setMathPoint(mathPoint);
+//                    ballView.setLtPosition(new float[]{xPositons[j] + 3f, yPositons[i] + 3f});
+//                    ballView.setRbPosition(new float[]{xPositons[j + 1] - 3f, yPositons[i + 1] - 3f});
                     flContainer.addView(ballView);
                 }
             }
