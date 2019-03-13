@@ -8,6 +8,8 @@ import android.graphics.PointF;
 import android.util.Log;
 import android.view.View;
 
+import com.zingking.bricks.widget.callback.IDrawListener;
+
 /**
  * Copyright © 2018 www.zingking.cn All Rights Reserved.
  *
@@ -136,7 +138,7 @@ public class BricksBackgroundView extends View {
             }
         }
         drawBallLine();
-        canvas.drawCircle(pointPosition.x, pointPosition.y, 50, paint);
+//        canvas.drawCircle(pointPosition.x, pointPosition.y, 50, paint);
     }
 
     private void drawBallLine() {

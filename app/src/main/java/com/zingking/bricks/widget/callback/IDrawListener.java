@@ -1,4 +1,4 @@
-package com.zingking.bricks.widget;
+package com.zingking.bricks.widget.callback;
 
 /**
  * Copyright (c) 2018, Z.kai All rights reserved.

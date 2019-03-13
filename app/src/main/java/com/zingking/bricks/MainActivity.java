@@ -8,14 +8,14 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import com.zingking.bricks.entity.MathPoint;
+import com.zingking.bricks.widget.BallView;
 import com.zingking.bricks.widget.BrickView;
 import com.zingking.bricks.widget.BricksBackgroundView;
 import com.zingking.bricks.widget.GameLevelUtils;
-import com.zingking.bricks.widget.IDrawListener;
+import com.zingking.bricks.widget.callback.IDrawListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +38,7 @@ public class MainActivity extends Activity {
     private float lastTouchX = 0;
     private float lastTouchY = 0;
     private Thread thread;
+    private BallView ballView;
 
 
     @Override
@@ -49,10 +50,13 @@ public class MainActivity extends Activity {
 
     private void initView() {
         flContainer = (FrameLayout) findViewById(R.id.fl_container);
+        ballView = new BallView(this);
         backgroundView = new BricksBackgroundView(this);
         backgroundView.setDrawListener(new IDrawListener() {
             @Override
             public void onSuccess() {
+                Log.d(TAG, "onSuccess() called");
+
                 if (brickPosition == null) {
                     createBrickPosition();
                 }
@@ -136,6 +140,7 @@ public class MainActivity extends Activity {
          backgroundView.setHorizontalNum(HORIZONTAL_NUM);
 //        backgroundView.setVerticalNum(VERTICAL_NUM);
         backgroundView.setPadding(PADDING);
+        flContainer.addView(ballView, -1);
     }
 
     private final Object object = new Object();
@@ -208,7 +213,7 @@ public class MainActivity extends Activity {
                                     isDown = true;
                                 }
                             }
-                            backgroundView.setPointPosition(pointF);// FIXME: 2018/12/25 这里会导致整个ui重绘
+                            ballView.setPointPosition(pointF);// FIXME: 2018/12/25 这里会导致整个ui重绘
                             // TODO: 2018/12/25 优化小球绘制 by Z.kai
                         } catch (InterruptedException e) {
                             e.printStackTrace();
