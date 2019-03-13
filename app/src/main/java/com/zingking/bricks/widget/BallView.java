@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.TestLooperManager;
 import android.view.View;
 
 /**
@@ -19,8 +18,9 @@ import android.view.View;
  */
 
 public class BallView extends View {
-    private PointF pointPosition = new PointF();
+    private PointF pointPosition = new PointF(20,20);
     private Paint paint;
+    private int[] ballPosition = new int[]{0, 0};
 
     public BallView(Context context) {
         super(context);
@@ -50,9 +50,24 @@ public class BallView extends View {
         });
     }
 
+    public int[] getBallPosition() {
+        return ballPosition;
+    }
+
+    public void setBallPosition(int[] ballPosition) {
+        this.ballPosition = ballPosition;
+        postInvalidate();
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
-        canvas.drawCircle(pointPosition.x, pointPosition.y, 50, paint);
+        StringBuilder sb = new StringBuilder();
+        sb.append("(").append(ballPosition[0]).append(",").append(ballPosition[1]).append(")");
+        canvas.drawCircle(pointPosition.x, pointPosition.y, 20, paint);
+        // 画当前小球坐标
+//        paint.setColor(Color.RED);
+//        canvas.drawText(sb.toString(), pointPosition.x, pointPosition.y, paint);
+//        paint.reset();
         super.onDraw(canvas);
     }
 }

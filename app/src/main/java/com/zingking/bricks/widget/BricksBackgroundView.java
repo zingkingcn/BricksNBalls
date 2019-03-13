@@ -22,6 +22,7 @@ public class BricksBackgroundView extends View {
     private static final String TAG = "BricksBackgroundView";
 
     private Paint paint;
+    private Paint txtPaint;
     private Canvas canvas;
     private int padding = 60;
     private int width;
@@ -61,6 +62,11 @@ public class BricksBackgroundView extends View {
         paint = new Paint();
         paint.setStrokeWidth(6);
         paint.setColor(Color.parseColor("#00ffff"));
+
+       txtPaint = new Paint();
+       txtPaint.setStrokeWidth(6);
+       txtPaint.setTextSize(30f);
+       txtPaint.setColor(Color.parseColor("#ff0000"));
     }
 
     @Deprecated
@@ -195,17 +201,26 @@ public class BricksBackgroundView extends View {
         for (int i = 0; i < verticalLineNum; i++) {
             drawHorizontalLine(i, everyHeight);
         }
+
+        // 画方块坐标
+//        for (int i = 0, len = xPositions.length; i < len; i++) {
+//            for (int j = 0, len2 = yPositions.length; j < len2; j++) {
+//                canvas.drawText(i + "," + j, xPositions[i]+20, yPositions[j]+40, txtPaint);
+//            }
+//        }
     }
 
     private void drawHorizontalLine(int index, float everyHeight) {
         float y = index * everyHeight;
-        canvas.drawLine(0, y + padding / 2 + deltaY, getWidth(), y + padding / 2 + deltaY, paint);
+        // 画辅助线
+//        canvas.drawLine(0, y + padding / 2 + deltaY, getWidth(), y + padding / 2 + deltaY, paint);
         yPositions[index] = y + padding / 2 + deltaY;
     }
 
     private void drawVerticalLine(int index, float everyWidth) {
         float x = index * everyWidth;
-        canvas.drawLine(x + padding / 2 + deltaX, 0, x + padding / 2 + deltaX, getHeight(), paint);
+        // 画辅助线
+//        canvas.drawLine(x + padding / 2 + deltaX, 0, x + padding / 2 + deltaX, getHeight(), paint);
         xPositions[index] = x + padding / 2 + deltaX;
     }
 

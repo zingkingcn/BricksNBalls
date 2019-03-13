@@ -3,6 +3,7 @@ package com.zingking.bricks;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.PointF;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -15,6 +16,7 @@ import com.zingking.bricks.widget.BallView;
 import com.zingking.bricks.widget.BrickView;
 import com.zingking.bricks.widget.BricksBackgroundView;
 import com.zingking.bricks.widget.GameLevelUtils;
+import com.zingking.bricks.widget.LineView;
 import com.zingking.bricks.widget.callback.IDrawListener;
 
 import java.util.ArrayList;
@@ -39,6 +41,8 @@ public class MainActivity extends Activity {
     private float lastTouchY = 0;
     private Thread thread;
     private BallView ballView;
+    private LineView lineView;
+    private List<MathPoint> mathPointList = new ArrayList<>();
 
 
     @Override
@@ -61,7 +65,6 @@ public class MainActivity extends Activity {
                     createBrickPosition();
                 }
                 drawBrickByLevel();
-                backgroundView.bringToFront();
             }
 
             @Override
@@ -73,12 +76,12 @@ public class MainActivity extends Activity {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
                 Log.d(TAG, "dispatchTouchEvent() called with: event = [" + event + "]");
+                if (isDrawing) {
+                    return true;
+                }
                 int action = event.getAction();
                 switch (action) {
                     case MotionEvent.ACTION_DOWN:
-                        if (isDrawing) {
-                            break;
-                        }
                         currTouchX = 0;
                         currTouchY = 0;
                         float x = event.getX();
@@ -95,7 +98,7 @@ public class MainActivity extends Activity {
                         }else {
                             currTouchY = lastTouchY;
                         }
-                        backgroundView.setLinePosition(new PointF(x, y));
+                        lineView.setLineStopPosition(new PointF(x, y));
                         break;
                     case MotionEvent.ACTION_MOVE:
                         if (isDrawing) {
@@ -115,7 +118,7 @@ public class MainActivity extends Activity {
                         }else {
                             currTouchY = lastTouchY;
                         }
-                        backgroundView.setLinePosition(new PointF(x, y));
+                        lineView.setLineStopPosition(new PointF(x, y));
                         break;
                     case MotionEvent.ACTION_OUTSIDE:
                         Log.i(TAG, "dispatchTouchEvent: 超界");
@@ -124,7 +127,10 @@ public class MainActivity extends Activity {
                         Log.i(TAG, "onTouch: currTouchX = " + currTouchX);
                         Log.i(TAG, "onTouch: currTouchY = " + currTouchY);
                         if (currTouchX > 0 && currTouchY > 0) {
-                            angle = Math.atan(currTouchY / (double)currTouchX) / Math.PI * 180;
+                            PointF lineStartPosition = lineView.getLineStartPosition();
+                            PointF lineStopPosition = lineView.getLineStopPosition();
+                            angle = Math.atan((lineStopPosition.y - lineStartPosition.y) / ((double) (lineStopPosition
+                                    .x - lineStartPosition.x))) / Math.PI *180;
                             startAutoMove();
                         }
                         break;
@@ -136,11 +142,14 @@ public class MainActivity extends Activity {
         });
         backgroundView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
-        flContainer.addView(backgroundView, -1);
          backgroundView.setHorizontalNum(HORIZONTAL_NUM);
 //        backgroundView.setVerticalNum(VERTICAL_NUM);
         backgroundView.setPadding(PADDING);
-        flContainer.addView(ballView, -1);
+        lineView = new LineView(this);
+        lineView.setLineStartPosition(new PointF(ballRadius, ballRadius));
+        flContainer.addView(backgroundView);
+        flContainer.addView(ballView);
+        flContainer.addView(lineView);
     }
 
     private final Object object = new Object();
@@ -151,13 +160,20 @@ public class MainActivity extends Activity {
     double moveX = 0;
     private boolean isRight = true;
     private boolean isDown = true;
+    float detal = 10f;
+    float ballRadius = 20f;
+
     private void startAutoMove() {
-        moveY  = Math.sin(angle * Math.PI / 180) * 100;
-        moveX = Math.cos(angle * Math.PI / 180) * 100;
+        moveY = Math.sin(angle * Math.PI / 180) * detal;
+        moveX = Math.cos(angle * Math.PI / 180) * detal;
         if (isDrawing) {
             return;
         }
-        final PointF pointF = new PointF(0, 100);
+        isRight = angle > 0;
+        isDown = true;
+        moveY = Math.abs(moveY);
+        moveX = Math.abs(moveX);
+        final PointF pointF = new PointF(ballRadius, ballRadius);
         synchronized (object) {
             object.notify();
         }
@@ -168,53 +184,45 @@ public class MainActivity extends Activity {
                     while (true) {
                         try {
                             Log.i(TAG, "run: pointF =  " + pointF.toString());
-                            if (pointF.y < 0) {
+                            if (pointF.y - ballRadius < 0) {
                                 synchronized (object) {
                                     isDrawing = false;
-                                    isRight = true;
-                                    isDown = true;
-                                    pointF.x = -1;
-                                    pointF.y = -1;
+                                    lineView.setLineStartPosition(pointF);
+                                    pointF.y = ballRadius;
                                     object.wait();
                                 }
                             }
                             Thread.sleep(16);
-//                            if (pointF.x <= currTouchX) {
-//                                pointF.x += moveX;
-//                            }
                             if (isRight){
-                                if (pointF.x <= backgroundView.getWidth()) {
+                                if (!changeLR(pointF)) {
                                     pointF.x += moveX;
                                 }else {
                                     isRight = false;
                                 }
                             } else {
-                                if (pointF.x > 0) {
+                                boolean b = changeLR(pointF);
+                                if (!b) {
                                     pointF.x -= moveX;
                                 } else {
-                                    pointF.x = 0;
                                     isRight = true;
                                 }
                             }
-//                            if (pointF.y <= currTouchY) {
-//                                pointF.y += moveY;
-//                            }
                             if (isDown) {
-                                if (pointF.y <= backgroundView.getHeight()) {
+                                if (!changeTB(pointF)) {
                                     pointF.y += moveY;
                                 } else {
                                     isDown = false;
                                 }
                             } else {
-                                if (pointF.y > 0) {
+                                if (!changeTB(pointF)) {
                                     pointF.y -= moveY;
                                 } else {
-                                    pointF.y = 0;
                                     isDown = true;
                                 }
                             }
-                            ballView.setPointPosition(pointF);// FIXME: 2018/12/25 这里会导致整个ui重绘
-                            // TODO: 2018/12/25 优化小球绘制 by Z.kai
+                            int[] ballPosition = getBallPosition(pointF);
+                            ballView.setPointPosition(pointF);
+                            ballView.setBallPosition(ballPosition);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -252,17 +260,18 @@ public class MainActivity extends Activity {
             }
             for (int xCoordinate = 0; xCoordinate < xLen; xCoordinate++) {
                 if (brickPosition[yCoordinate][xCoordinate] == 1) {
-                    MathPoint mathPoint = new MathPoint(yCoordinate, xCoordinate);
+                    MathPoint mathPoint = new MathPoint(xCoordinate, yCoordinate);
                     mathPoint.setRange(xPositions[xCoordinate] + 3f, yPositions[yCoordinate] + 3f,
                             xPositions[xCoordinate + 1] - 3f, yPositions[yCoordinate + 1] - 3f);
-                    BrickView ballView = new BrickView(context);
-                    ballView.setMathPoint(mathPoint);
-//                    ballView.setLtPosition(new float[]{xPositions[xCoordinate] + 3f, yPositions[yCoordinate] + 3f});
-//                    ballView.setRbPosition(new float[]{xPositions[xCoordinate + 1] - 3f, yPositions[yCoordinate + 1] - 3f});
-                    flContainer.addView(ballView);
+                    BrickView brickView = new BrickView(context);
+                    brickView.setMathPoint(mathPoint);
+                    flContainer.addView(brickView);
+                    mathPointList.add(mathPoint);
                 }
             }
         }
+        ballView.bringToFront();
+        lineView.bringToFront();
     }
 
         // 遍历数据，竖着画(先遍历xPositions)
@@ -324,5 +333,102 @@ public class MainActivity extends Activity {
                 break;
             default:
         }
+    }
+
+
+    /**
+     * 左右方向是否改变
+     */
+    private boolean changeLR(PointF pointF) {
+        int[] ballPosition = getBallPosition(pointF);
+        boolean result = false;
+        for (MathPoint mathPoint : mathPointList) {
+            RectF range = mathPoint.getRange();
+            if (isRight) {
+                if (ballPosition[0] + 1 == mathPoint.getX()&& ballPosition[1] == mathPoint.getY()) {
+                    // 如果小球向右移动，当小球x坐标大于方块左侧，则表示需要改为向左移动
+                    result = pointF.x + ballRadius >= range.left;
+                    break;
+                }
+            } else {
+                if (ballPosition[0] - 1 == mathPoint.getX() && ballPosition[1] == mathPoint.getY()) {
+                    // 如果小球向左移动，当小球x坐标小于方块右侧，则表示需要改为向向右移动
+                    result = pointF.x - ballRadius <= range.right && pointF.x - ballRadius >= range.left;
+                    break;
+                }
+            }
+        }
+        // 如果未发生碰撞则检测边缘
+        if (!result) {
+            if(isRight){
+                result = pointF.x + ballRadius >= backgroundView.getWidth();
+            }else {
+                result = pointF.x - ballRadius < 0;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 上下方向是否改变
+     */
+    private boolean changeTB(PointF pointF) {
+        boolean result = false;
+        int[] ballPosition = getBallPosition(pointF);
+        for (MathPoint mathPoint : mathPointList) {
+            RectF range = mathPoint.getRange();
+            if (isDown) {
+                if (ballPosition[1] + 1 == mathPoint.getY()&& ballPosition[0] == mathPoint.getX()) {
+                    // 如果小球向下移动，当小球y坐标大于方块上侧，则表示需要改为向上移动
+                    result = pointF.y + ballRadius >= range.top;
+                }
+            } else {
+                if (ballPosition[1] - 1 == mathPoint.getY() && ballPosition[0] == mathPoint.getX()) {
+                    // 如果小球向上移动，当小球y坐标小于方块下侧，则表示需要改为向向下移动
+                    result = pointF.y - ballRadius <= range.bottom && pointF.y - ballRadius >= range.top;
+                }
+            }
+        }
+        // 如果未发生碰撞则检测边缘
+        if (!result) {
+            if(isDown){
+                result = pointF.y + ballRadius >= backgroundView.getHeight();
+            }else {
+                result = pointF.y - ballRadius < 0;
+            }
+        }
+        return result;
+    }
+
+    private int[] getBallPosition(PointF pointF) {
+        final float[] xPositions = backgroundView.getXPositions();// x轴点的数量和 列位置参数(数组长度为数量，值为位置参数)
+        final float[] yPositions = backgroundView.getYPositions();// y轴点的数量和 行位置参数
+        int xCoordinate = -1;
+        int yCoordinate = -1;
+        if (pointF.x<xPositions[0]){
+            xCoordinate = -1;
+        } else if (pointF.x > xPositions[xPositions.length - 1]) {
+            xCoordinate = xPositions.length -1;
+        }
+
+        if (pointF.y<yPositions[0]){
+            yCoordinate = -1;
+        } else if (pointF.y > yPositions[yPositions.length - 1]) {
+            yCoordinate = yPositions.length -1;
+        }
+
+        for (int i = 0, len = xPositions.length - 1; i < len; i++) {
+            if (pointF.x > xPositions[i] && pointF.x < xPositions[i + 1]) {
+                xCoordinate = i;
+                break;
+            }
+        }
+        for (int i = 0, len = yPositions.length - 1; i < len; i++) {
+            if (pointF.y > yPositions[i] && pointF.y < yPositions[i + 1]) {
+                yCoordinate = i;
+                break;
+            }
+        }
+        return new int[]{xCoordinate, yCoordinate};
     }
 }
