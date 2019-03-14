@@ -2,6 +2,7 @@ package com.zingking.bricks;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Bundle;
@@ -11,13 +12,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import com.zingking.bricks.entity.BackgroundPosition;
 import com.zingking.bricks.entity.MathPoint;
+import com.zingking.bricks.mvp.view.BrickActivity;
 import com.zingking.bricks.widget.BallView;
 import com.zingking.bricks.widget.BrickView;
 import com.zingking.bricks.widget.BricksBackgroundView;
-import com.zingking.bricks.widget.GameLevelUtils;
+import com.zingking.bricks.utils.GameLevelUtils;
 import com.zingking.bricks.widget.LineView;
-import com.zingking.bricks.widget.callback.IDrawListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +47,10 @@ public class MainActivity extends Activity {
     private List<MathPoint> mathPointList = new ArrayList<>();
 
 
+
+    private PointF lineStartPF = new PointF(0,0);
+    private PointF lineStopPF = new PointF(0,0);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,11 +62,9 @@ public class MainActivity extends Activity {
         flContainer = (FrameLayout) findViewById(R.id.fl_container);
         ballView = new BallView(this);
         backgroundView = new BricksBackgroundView(this);
-        backgroundView.setDrawListener(new IDrawListener() {
+        backgroundView.setDrawListener(new BricksBackgroundView.IDrawListener() {
             @Override
-            public void onSuccess() {
-                Log.d(TAG, "onSuccess() called");
-
+            public void onSuccess(BackgroundPosition position) {
                 if (brickPosition == null) {
                     createBrickPosition();
                 }
@@ -98,7 +102,10 @@ public class MainActivity extends Activity {
                         }else {
                             currTouchY = lastTouchY;
                         }
-                        lineView.setLineStopPosition(new PointF(x, y));
+
+                        lineStartPF.x = x;
+                        lineStartPF.y = y;
+//                        lineView.setLineStopPosition(new PointF(x, y));
                         break;
                     case MotionEvent.ACTION_MOVE:
                         if (isDrawing) {
@@ -118,6 +125,9 @@ public class MainActivity extends Activity {
                         }else {
                             currTouchY = lastTouchY;
                         }
+
+                        lineStopPF.x = x;
+                        lineStopPF.y = y;
                         lineView.setLineStopPosition(new PointF(x, y));
                         break;
                     case MotionEvent.ACTION_OUTSIDE:
@@ -127,8 +137,18 @@ public class MainActivity extends Activity {
                         Log.i(TAG, "onTouch: currTouchX = " + currTouchX);
                         Log.i(TAG, "onTouch: currTouchY = " + currTouchY);
                         if (currTouchX > 0 && currTouchY > 0) {
-                            PointF lineStartPosition = lineView.getLineStartPosition();
-                            PointF lineStopPosition = lineView.getLineStopPosition();
+                            PointF lineStartPosition1 = lineView.getLineStartPosition();
+                            PointF lineStopPosition1 = lineView.getLineStopPosition();
+
+
+                            PointF lineStartPosition = lineStartPF;
+                            PointF lineStopPosition = lineStopPF;
+
+                            Log.i(TAG, "kai ---- onTouch lineStartPosition1 ----> " + lineStartPosition1);
+                            Log.i(TAG, "kai ---- onTouch lineStopPosition1 ----> " + lineStopPosition1);
+
+                            Log.i(TAG, "kai ---- onTouch lineStartPosition ----> " + lineStartPosition);
+                            Log.i(TAG, "kai ---- onTouch lineStopPosition ----> " + lineStopPosition);
                             angle = Math.atan((lineStopPosition.y - lineStartPosition.y) / ((double) (lineStopPosition
                                     .x - lineStartPosition.x))) / Math.PI *180;
                             startAutoMove();
@@ -192,7 +212,7 @@ public class MainActivity extends Activity {
                                     object.wait();
                                 }
                             }
-                            Thread.sleep(16);
+                            Thread.sleep(2);
                             if (isRight){
                                 if (!changeLR(pointF)) {
                                     pointF.x += moveX;
@@ -222,7 +242,7 @@ public class MainActivity extends Activity {
                             }
                             int[] ballPosition = getBallPosition(pointF);
                             ballView.setPointPosition(pointF);
-                            ballView.setBallPosition(ballPosition);
+                            ballView.setBallCoordinate(ballPosition);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -330,6 +350,9 @@ public class MainActivity extends Activity {
         switch (id){
             case R.id.btn_change:
                 drawBrickByRandom();
+                break;
+            case R.id.btn_mvp:
+                startActivity(new Intent(this, BrickActivity.class));
                 break;
             default:
         }

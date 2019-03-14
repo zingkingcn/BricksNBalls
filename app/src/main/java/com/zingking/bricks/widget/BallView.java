@@ -18,9 +18,18 @@ import android.view.View;
  */
 
 public class BallView extends View {
-    private PointF pointPosition = new PointF(20,20);
+    private final float X = 20f;
+    private final float Y = 20f;
+    private final float radius = 20f;
+    /**
+     * 小球的圆心
+     */
+    private PointF pointPosition = new PointF(X,Y);
     private Paint paint;
-    private int[] ballPosition = new int[]{0, 0};
+    /**
+     * 小球数学坐标点
+     */
+    private int[] ballCoordinate = new int[]{0, 0};
 
     public BallView(Context context) {
         super(context);
@@ -50,20 +59,20 @@ public class BallView extends View {
         });
     }
 
-    public int[] getBallPosition() {
-        return ballPosition;
+    public int[] getBallCoordinate() {
+        return ballCoordinate;
     }
 
-    public void setBallPosition(int[] ballPosition) {
-        this.ballPosition = ballPosition;
+    public void setBallCoordinate(int[] ballCoordinate) {
+        this.ballCoordinate = ballCoordinate;
         postInvalidate();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         StringBuilder sb = new StringBuilder();
-        sb.append("(").append(ballPosition[0]).append(",").append(ballPosition[1]).append(")");
-        canvas.drawCircle(pointPosition.x, pointPosition.y, 20, paint);
+        sb.append("(").append(ballCoordinate[0]).append(",").append(ballCoordinate[1]).append(")");
+        canvas.drawCircle(pointPosition.x, pointPosition.y, radius, paint);
         // 画当前小球坐标
 //        paint.setColor(Color.RED);
 //        canvas.drawText(sb.toString(), pointPosition.x, pointPosition.y, paint);

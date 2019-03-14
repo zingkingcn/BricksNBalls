@@ -4,11 +4,10 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PointF;
 import android.util.Log;
 import android.view.View;
 
-import com.zingking.bricks.widget.callback.IDrawListener;
+import com.zingking.bricks.entity.BackgroundPosition;
 
 /**
  * Copyright © 2018 www.zingking.cn All Rights Reserved.
@@ -20,22 +19,6 @@ import com.zingking.bricks.widget.callback.IDrawListener;
 
 public class BricksBackgroundView extends View {
     private static final String TAG = "BricksBackgroundView";
-
-    private Paint paint;
-    private Paint txtPaint;
-    private Canvas canvas;
-    private int padding = 60;
-    private int width;
-    private int height;
-    private PointF pointPosition = new PointF();
-    private PointF linePosition = new PointF();
-    /**
-     *
-     */
-    private float[] xPositions;
-    private float[] yPositions;
-    private IDrawListener iDrawListener;
-
     /**
      * 高和个数不能整除时对齐的偏移量
      */
@@ -44,6 +27,19 @@ public class BricksBackgroundView extends View {
      * 宽和个数不能整除时对齐的偏移量
      */
     float deltaX = 0F;
+    private Paint paint;
+    private Paint txtPaint;
+    private Canvas canvas;
+    private int padding = 60;
+    private int width;
+    private int height;
+    private BackgroundPosition position = new BackgroundPosition();
+    /**
+     *
+     */
+    private float[] xPositions;
+    private float[] yPositions;
+    private IDrawListener iDrawListener;
     /**
      * 横向砖块个数
      */
@@ -63,36 +59,30 @@ public class BricksBackgroundView extends View {
         paint.setStrokeWidth(6);
         paint.setColor(Color.parseColor("#00ffff"));
 
-       txtPaint = new Paint();
-       txtPaint.setStrokeWidth(6);
-       txtPaint.setTextSize(30f);
-       txtPaint.setColor(Color.parseColor("#ff0000"));
-    }
-
-    @Deprecated
-    @Override
-    public void setPadding(int left, int top, int right, int bottom) {
-
+        txtPaint = new Paint();
+        txtPaint.setStrokeWidth(6);
+        txtPaint.setTextSize(30f);
+        txtPaint.setColor(Color.parseColor("#ff0000"));
     }
 
     public void setPadding(int value) {
         padding = value;
     }
 
-    public void setHorizontalNum(int value) {
-        this.horizontalNum = value;
-    }
-
-    public void setVerticalNum(int value) {
-        this.verticalNum = value;
-    }
-
     public int getHorizontalNum() {
         return horizontalNum;
     }
 
+    public void setHorizontalNum(int value) {
+        this.horizontalNum = value;
+    }
+
     public int getVerticalNum() {
         return verticalNum;
+    }
+
+    public void setVerticalNum(int value) {
+        this.verticalNum = value;
     }
 
     public void setContentGravity() {
@@ -103,22 +93,17 @@ public class BricksBackgroundView extends View {
         this.iDrawListener = iDrawListener;
     }
 
-    public PointF getPointPosition() {
-        return pointPosition;
+    public float[] getXPositions() {
+        return xPositions;
     }
 
-    public void setPointPosition(PointF pointPosition) {
-        if (pointPosition != null) {
-            this.pointPosition.set(pointPosition);
-            invalidate();
-        }
+    public float[] getYPositions() {
+        return yPositions;
     }
 
-    public void setLinePosition(PointF linePosition) {
-        if (linePosition != null) {
-            this.linePosition.set(linePosition);
-            invalidate();
-        }
+    @Override
+    public boolean performClick() {
+        return super.performClick();
     }
 
     @Override
@@ -131,50 +116,26 @@ public class BricksBackgroundView extends View {
         if (horizontalNum != 0) {
             drawByHorizontalNum();
             if (iDrawListener != null) {
-                iDrawListener.onSuccess();
+                updatePosition();
+                iDrawListener.onSuccess(position);
             }
         } else if (verticalNum != 0) {
             drawByVerticalNum();
             if (iDrawListener != null) {
-                iDrawListener.onSuccess();
+                updatePosition();
+                iDrawListener.onSuccess(position);
             }
         } else {
             if (iDrawListener != null) {
                 iDrawListener.onFailed();
             }
         }
-        drawBallLine();
-//        canvas.drawCircle(pointPosition.x, pointPosition.y, 50, paint);
     }
 
-    private void drawBallLine() {
-        canvas.drawLine(0, 0, linePosition.x, linePosition.y, paint);
-    }
+    @Deprecated
+    @Override
+    public void setPadding(int left, int top, int right, int bottom) {
 
-    private void drawByVerticalNum() {
-        float everyHeight = (height - padding) / verticalNum;
-        int verticalLineNum = verticalNum + 1;
-        float lastY = verticalNum * everyHeight;
-//        deltaY = height - lastY - padding; // if bottom
-//        deltaY = deltaY / 2;// if center
-        yPositions = new float[verticalLineNum];
-        // 根据竖向砖块画横线
-        for (int i = 0; i < verticalLineNum; i++) {
-            drawHorizontalLine(i, everyHeight);
-        }
-
-        float everyWidth = everyHeight;
-        int horizontalNum = (int) ((width - padding) / everyWidth);
-        setHorizontalNum(horizontalNum);
-        int horizontalLineNum = horizontalNum + 1;
-        float lastX = horizontalNum * everyWidth;
-//        deltaX = width - lastX - padding; // if right
-//        deltaX = deltaX / 2;// if center
-        xPositions = new float[horizontalLineNum];
-        // 根据横向砖块画竖线
-        for (int i = 0; i < horizontalLineNum; i++) {
-            drawVerticalLine(i, everyWidth);
-        }
     }
 
     private void drawByHorizontalNum() {
@@ -210,11 +171,37 @@ public class BricksBackgroundView extends View {
 //        }
     }
 
-    private void drawHorizontalLine(int index, float everyHeight) {
-        float y = index * everyHeight;
-        // 画辅助线
-//        canvas.drawLine(0, y + padding / 2 + deltaY, getWidth(), y + padding / 2 + deltaY, paint);
-        yPositions[index] = y + padding / 2 + deltaY;
+    private void updatePosition() {
+        position.setWidth(getWidth());
+        position.setHeight(getHeight());
+        position.setXPositions(xPositions);
+        position.setYPositions(yPositions);
+    }
+
+    private void drawByVerticalNum() {
+        float everyHeight = (height - padding) / verticalNum;
+        int verticalLineNum = verticalNum + 1;
+        float lastY = verticalNum * everyHeight;
+//        deltaY = height - lastY - padding; // if bottom
+//        deltaY = deltaY / 2;// if center
+        yPositions = new float[verticalLineNum];
+        // 根据竖向砖块画横线
+        for (int i = 0; i < verticalLineNum; i++) {
+            drawHorizontalLine(i, everyHeight);
+        }
+
+        float everyWidth = everyHeight;
+        int horizontalNum = (int) ((width - padding) / everyWidth);
+        setHorizontalNum(horizontalNum);
+        int horizontalLineNum = horizontalNum + 1;
+        float lastX = horizontalNum * everyWidth;
+//        deltaX = width - lastX - padding; // if right
+//        deltaX = deltaX / 2;// if center
+        xPositions = new float[horizontalLineNum];
+        // 根据横向砖块画竖线
+        for (int i = 0; i < horizontalLineNum; i++) {
+            drawVerticalLine(i, everyWidth);
+        }
     }
 
     private void drawVerticalLine(int index, float everyWidth) {
@@ -224,12 +211,25 @@ public class BricksBackgroundView extends View {
         xPositions[index] = x + padding / 2 + deltaX;
     }
 
-    public float[] getXPositions() {
-        return xPositions;
+    private void drawHorizontalLine(int index, float everyHeight) {
+        float y = index * everyHeight;
+        // 画辅助线
+//        canvas.drawLine(0, y + padding / 2 + deltaY, getWidth(), y + padding / 2 + deltaY, paint);
+        yPositions[index] = y + padding / 2 + deltaY;
     }
 
-    public float[] getYPositions() {
-        return yPositions;
+    public interface IDrawListener {
+        /**
+         * 绘制成功
+         *
+         * @param position 背景位置相关参数
+         */
+        void onSuccess(BackgroundPosition position);
+
+        /**
+         * 绘制失败
+         */
+        void onFailed();
     }
 
 }

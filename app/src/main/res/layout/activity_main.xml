@@ -21,4 +21,13 @@
             android:text="CHANGE"
             android:onClick="btnClick"/>
 
+    <Button
+            android:id="@+id/btn_mvp"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="50dp"
+            android:text="MVP"
+            android:onClick="btnClick"/>
+
 </FrameLayout>
