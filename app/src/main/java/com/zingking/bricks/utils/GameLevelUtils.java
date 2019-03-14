@@ -14,9 +14,9 @@ public class GameLevelUtils {
     }
 
     public static int[][] getLevel() {
-        if (true) {
-            return getSimpleLevel();
-        }
+//        if (true) {
+//            return getSimpleLevel();
+//        }
         int[] line0 = new int[]{0, 1, 1, 1, 1, 1, 0};
         int[] line1 = new int[]{1, 0, 1, 1, 1, 1, 1};
         int[] line2 = new int[]{1, 1, 1, 0, 1, 1, 1};

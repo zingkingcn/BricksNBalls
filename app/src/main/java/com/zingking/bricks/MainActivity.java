@@ -45,12 +45,6 @@ public class MainActivity extends Activity {
     private BallView ballView;
     private LineView lineView;
     private List<MathPoint> mathPointList = new ArrayList<>();
-
-
-
-    private PointF lineStartPF = new PointF(0,0);
-    private PointF lineStopPF = new PointF(0,0);
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,10 +96,7 @@ public class MainActivity extends Activity {
                         }else {
                             currTouchY = lastTouchY;
                         }
-
-                        lineStartPF.x = x;
-                        lineStartPF.y = y;
-//                        lineView.setLineStopPosition(new PointF(x, y));
+                        lineView.setLineStopPosition(new PointF(x, y));
                         break;
                     case MotionEvent.ACTION_MOVE:
                         if (isDrawing) {
@@ -125,9 +116,6 @@ public class MainActivity extends Activity {
                         }else {
                             currTouchY = lastTouchY;
                         }
-
-                        lineStopPF.x = x;
-                        lineStopPF.y = y;
                         lineView.setLineStopPosition(new PointF(x, y));
                         break;
                     case MotionEvent.ACTION_OUTSIDE:
@@ -137,18 +125,8 @@ public class MainActivity extends Activity {
                         Log.i(TAG, "onTouch: currTouchX = " + currTouchX);
                         Log.i(TAG, "onTouch: currTouchY = " + currTouchY);
                         if (currTouchX > 0 && currTouchY > 0) {
-                            PointF lineStartPosition1 = lineView.getLineStartPosition();
-                            PointF lineStopPosition1 = lineView.getLineStopPosition();
-
-
-                            PointF lineStartPosition = lineStartPF;
-                            PointF lineStopPosition = lineStopPF;
-
-                            Log.i(TAG, "kai ---- onTouch lineStartPosition1 ----> " + lineStartPosition1);
-                            Log.i(TAG, "kai ---- onTouch lineStopPosition1 ----> " + lineStopPosition1);
-
-                            Log.i(TAG, "kai ---- onTouch lineStartPosition ----> " + lineStartPosition);
-                            Log.i(TAG, "kai ---- onTouch lineStopPosition ----> " + lineStopPosition);
+                            PointF lineStartPosition = lineView.getLineStartPosition();
+                            PointF lineStopPosition = lineView.getLineStopPosition();
                             angle = Math.atan((lineStopPosition.y - lineStartPosition.y) / ((double) (lineStopPosition
                                     .x - lineStartPosition.x))) / Math.PI *180;
                             startAutoMove();
@@ -180,12 +158,12 @@ public class MainActivity extends Activity {
     double moveX = 0;
     private boolean isRight = true;
     private boolean isDown = true;
-    float detal = 10f;
+    float delta = 10f;
     float ballRadius = 20f;
 
     private void startAutoMove() {
-        moveY = Math.sin(angle * Math.PI / 180) * detal;
-        moveX = Math.cos(angle * Math.PI / 180) * detal;
+        moveY = Math.sin(angle * Math.PI / 180) * delta;
+        moveX = Math.cos(angle * Math.PI / 180) * delta;
         if (isDrawing) {
             return;
         }

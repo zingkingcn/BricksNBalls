@@ -5,7 +5,10 @@ import android.graphics.RectF;
 
 import com.zingking.bricks.entity.BackgroundPosition;
 import com.zingking.bricks.entity.MathPoint;
+import com.zingking.bricks.event.BallCrashEvent;
 import com.zingking.bricks.utils.GameLevelUtils;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,6 +69,10 @@ public class BrickModel {
         mathPointList.add(mathPoint);
     }
 
+    public void removeMathPoint(MathPoint mathPoint){
+        mathPointList.remove(mathPoint);
+    }
+
     public void setLineStartPF(PointF lineStartPF) {
         this.lineStartPF = lineStartPF;
     }
@@ -94,12 +101,18 @@ public class BrickModel {
                 if (ballPosition[0] + 1 == mathPoint.getX() && ballPosition[1] == mathPoint.getY()) {
                     // 如果小球向右移动，当小球x坐标大于方块左侧，则表示需要改为向左移动
                     result = pointF.x + ballRadius >= range.left;
+                    if (result){
+                        EventBus.getDefault().post(new BallCrashEvent(mathPoint));
+                    }
                     break;
                 }
             } else {
                 if (ballPosition[0] - 1 == mathPoint.getX() && ballPosition[1] == mathPoint.getY()) {
                     // 如果小球向左移动，当小球x坐标小于方块右侧，则表示需要改为向向右移动
                     result = pointF.x - ballRadius <= range.right && pointF.x - ballRadius >= range.left;
+                    if (result){
+                        EventBus.getDefault().post(new BallCrashEvent(mathPoint));
+                    }
                     break;
                 }
             }
@@ -159,11 +172,17 @@ public class BrickModel {
                 if (ballPosition[1] + 1 == mathPoint.getY() && ballPosition[0] == mathPoint.getX()) {
                     // 如果小球向下移动，当小球y坐标大于方块上侧，则表示需要改为向上移动
                     result = pointF.y + ballRadius >= range.top;
+                    if (result){
+                        EventBus.getDefault().post(new BallCrashEvent(mathPoint));
+                    }
                 }
             } else {
                 if (ballPosition[1] - 1 == mathPoint.getY() && ballPosition[0] == mathPoint.getX()) {
                     // 如果小球向上移动，当小球y坐标小于方块下侧，则表示需要改为向向下移动
                     result = pointF.y - ballRadius <= range.bottom && pointF.y - ballRadius >= range.top;
+                    if (result){
+                        EventBus.getDefault().post(new BallCrashEvent(mathPoint));
+                    }
                 }
             }
         }

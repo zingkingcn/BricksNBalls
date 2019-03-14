@@ -10,11 +10,18 @@ import android.widget.FrameLayout;
 
 import com.zingking.bricks.R;
 import com.zingking.bricks.entity.MathPoint;
+import com.zingking.bricks.event.BallCrashEvent;
 import com.zingking.bricks.mvp.presenter.BrickPresenter;
 import com.zingking.bricks.widget.BallView;
 import com.zingking.bricks.widget.BrickView;
 import com.zingking.bricks.widget.BricksBackgroundView;
 import com.zingking.bricks.widget.LineView;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.HashMap;
 
 public class BrickActivity extends Activity implements IBrickView {
 
@@ -27,11 +34,13 @@ public class BrickActivity extends Activity implements IBrickView {
     private BricksBackgroundView bricksBackgroundView;
     private LineView lineView;
     private BallView ballView;
+    private HashMap<MathPoint, BrickView> pointViewHashMap = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_brick);
+        EventBus.getDefault().register(this);
         initView();
         brickPresenter = new BrickPresenter(this);
         brickPresenter.createLevel();
@@ -39,6 +48,12 @@ public class BrickActivity extends Activity implements IBrickView {
 
     private void initView() {
         flContainer = (FrameLayout) findViewById(R.id.fl_container);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -68,6 +83,7 @@ public class BrickActivity extends Activity implements IBrickView {
         BrickView brickView = new BrickView(this);
         brickView.setMathPoint(mathPoint);
         flContainer.addView(brickView);
+        pointViewHashMap.put(mathPoint, brickView);
     }
 
     @Override
@@ -100,5 +116,17 @@ public class BrickActivity extends Activity implements IBrickView {
     @Override
     public void updateBallCoordinate(int[] coordinate) {
         ballView.setBallCoordinate(coordinate);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void ballCrash(final BallCrashEvent ballCrashEvent) {
+        final BrickView brickView = pointViewHashMap.get(ballCrashEvent.getMathPoint());
+        brickView.shining(new BrickView.ShiningListener() {
+            @Override
+            public void remove(BrickView brickView) {
+                flContainer.removeView(brickView);
+                brickPresenter.removeBrick(brickView.getMathPoint());
+            }
+        });
     }
 }

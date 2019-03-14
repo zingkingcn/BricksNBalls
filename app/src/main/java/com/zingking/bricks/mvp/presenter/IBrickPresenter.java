@@ -3,6 +3,8 @@ package com.zingking.bricks.mvp.presenter;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.zingking.bricks.entity.MathPoint;
+
 /**
  * Copyright (c) 2019, Z.kai All rights reserved.
  *
@@ -17,4 +19,6 @@ public interface IBrickPresenter {
     void createLevel();
 
     void onBackgroundTouch(View view, MotionEvent motionEvent);
+
+    void removeBrick(MathPoint mathPoint);
 }

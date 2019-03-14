@@ -92,6 +92,11 @@ public class BrickPresenter implements IBrickPresenter {
         }
     }
 
+    @Override
+    public void removeBrick(MathPoint mathPoint) {
+        brickModel.removeMathPoint(mathPoint);
+    }
+
     private void updateLine(boolean isStart, PointF pointF) {
         if (isStart) {
             brickModel.setLineStartPF(pointF);
