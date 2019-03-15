@@ -34,8 +34,10 @@ public interface IBrickView {
      * 更新圆心
      *
      * @param pointF 圆心坐标
+     * @param angle  发射线角度
+     * @param delta  小球每次移动距离
      */
-    void updateBall(PointF pointF);
+    void updateBall(PointF pointF, double angle, float delta);
 
     /**
      * 更新圆的数学坐标

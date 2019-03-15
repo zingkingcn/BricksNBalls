@@ -10,8 +10,7 @@ import com.zingking.bricks.utils.GameLevelUtils;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Copyright (c) 2019, Z.kai All rights reserved.
@@ -29,7 +28,8 @@ public class BrickModel {
     /**
      * 砖块的数学坐标点集合
      */
-    private List<MathPoint> mathPointList = new ArrayList<>();
+    // README 用list会报ConcurrentModificationException
+    private CopyOnWriteArrayList<MathPoint> mathPointList = new CopyOnWriteArrayList<>();
     /**
      * 发射线的起点位置
      */
@@ -69,7 +69,7 @@ public class BrickModel {
         mathPointList.add(mathPoint);
     }
 
-    public void removeMathPoint(MathPoint mathPoint){
+    public void removeMathPoint(MathPoint mathPoint) {
         mathPointList.remove(mathPoint);
     }
 
@@ -101,7 +101,7 @@ public class BrickModel {
                 if (ballPosition[0] + 1 == mathPoint.getX() && ballPosition[1] == mathPoint.getY()) {
                     // 如果小球向右移动，当小球x坐标大于方块左侧，则表示需要改为向左移动
                     result = pointF.x + ballRadius >= range.left;
-                    if (result){
+                    if (result) {
                         EventBus.getDefault().post(new BallCrashEvent(mathPoint));
                     }
                     break;
@@ -110,7 +110,7 @@ public class BrickModel {
                 if (ballPosition[0] - 1 == mathPoint.getX() && ballPosition[1] == mathPoint.getY()) {
                     // 如果小球向左移动，当小球x坐标小于方块右侧，则表示需要改为向向右移动
                     result = pointF.x - ballRadius <= range.right && pointF.x - ballRadius >= range.left;
-                    if (result){
+                    if (result) {
                         EventBus.getDefault().post(new BallCrashEvent(mathPoint));
                     }
                     break;
@@ -172,7 +172,7 @@ public class BrickModel {
                 if (ballPosition[1] + 1 == mathPoint.getY() && ballPosition[0] == mathPoint.getX()) {
                     // 如果小球向下移动，当小球y坐标大于方块上侧，则表示需要改为向上移动
                     result = pointF.y + ballRadius >= range.top;
-                    if (result){
+                    if (result) {
                         EventBus.getDefault().post(new BallCrashEvent(mathPoint));
                     }
                 }
@@ -180,7 +180,7 @@ public class BrickModel {
                 if (ballPosition[1] - 1 == mathPoint.getY() && ballPosition[0] == mathPoint.getX()) {
                     // 如果小球向上移动，当小球y坐标小于方块下侧，则表示需要改为向向下移动
                     result = pointF.y - ballRadius <= range.bottom && pointF.y - ballRadius >= range.top;
-                    if (result){
+                    if (result) {
                         EventBus.getDefault().post(new BallCrashEvent(mathPoint));
                     }
                 }

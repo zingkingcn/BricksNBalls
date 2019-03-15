@@ -7,7 +7,10 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
+
+import com.zingking.bricks.listener.IDirectionChangeListener;
 
 /**
  * Copyright © 2018 www.zingking.cn All Rights Reserved.
@@ -24,7 +27,7 @@ public class BallView extends View {
     /**
      * 小球的圆心
      */
-    private PointF pointPosition = new PointF(X,Y);
+    private PointF pointPosition = new PointF(X, Y);
     private Paint paint;
     /**
      * 小球数学坐标点
@@ -47,6 +50,12 @@ public class BallView extends View {
         return pointPosition;
     }
 
+    /**
+     * 设置小球圆心位置，用来实现小球的移动，现改用{@link BallView#startAutoMove(double, float, IDirectionChangeListener)}
+     *
+     * @param position 设置小球圆心位置
+     */
+    @Deprecated
     public void setPointPosition(final PointF position) {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
@@ -77,6 +86,73 @@ public class BallView extends View {
 //        paint.setColor(Color.RED);
 //        canvas.drawText(sb.toString(), pointPosition.x, pointPosition.y, paint);
 //        paint.reset();
+        startAutoMove();
         super.onDraw(canvas);
+    }
+
+    private double moveY = 0;
+    private double moveX = 0;
+    private static final String TAG = "BallView";
+    private boolean isRight = true;
+    private boolean isDown = true;
+    private double angle = -1;
+    private float delta = -1;
+    private IDirectionChangeListener changeListener;
+
+    public void startAutoMove(double angle, float delta, IDirectionChangeListener changeListener) {
+        this.angle = angle;
+        this.delta = delta;
+        this.changeListener = changeListener;
+        moveY = Math.sin(angle * Math.PI / 180) * delta;
+        moveX = Math.cos(angle * Math.PI / 180) * delta;
+        isRight = angle > 0;
+        isDown = true;
+        moveY = Math.abs(moveY);
+        moveX = Math.abs(moveX);
+        startAutoMove();
+    }
+
+    private void startAutoMove() {
+        if (angle == -1 || delta == -1) {
+            return;
+        }
+        final PointF pointF = pointPosition;
+        boolean changeLR = changeListener.changeLR(isRight, pointF);
+        boolean changeTB = changeListener.changeTB(isDown, pointF);
+        if (isRight) {
+            if (changeLR) {
+                isRight = false;
+            } else {
+                pointF.x += moveX;
+            }
+        } else {
+            if (changeLR) {
+                isRight = true;
+            } else {
+                pointF.x -= moveX;
+            }
+        }
+        if (isDown) {
+            if (changeTB) {
+                isDown = false;
+            } else {
+                pointF.y += moveY;
+            }
+        } else {
+            if (changeTB) {
+                isDown = true;
+            } else {
+                pointF.y -= moveY;
+            }
+        }
+        pointPosition.set(pointF);
+        Log.i(TAG, "run: pointF =  " + pointF.toString());
+        if (pointF.y - radius < 0) {
+            pointF.y = radius;
+            angle = -1;
+            delta = -1;
+        } else {
+            postInvalidate();
+        }
     }
 }

@@ -11,6 +11,7 @@ import android.widget.FrameLayout;
 import com.zingking.bricks.R;
 import com.zingking.bricks.entity.MathPoint;
 import com.zingking.bricks.event.BallCrashEvent;
+import com.zingking.bricks.listener.IDirectionChangeListener;
 import com.zingking.bricks.mvp.presenter.BrickPresenter;
 import com.zingking.bricks.widget.BallView;
 import com.zingking.bricks.widget.BrickView;
@@ -22,6 +23,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.HashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class BrickActivity extends Activity implements IBrickView {
 
@@ -34,6 +36,8 @@ public class BrickActivity extends Activity implements IBrickView {
     private BricksBackgroundView bricksBackgroundView;
     private LineView lineView;
     private BallView ballView;
+    // README 遍历的时候用List会报ConcurrentModificationException
+    private CopyOnWriteArrayList<BallView> ballViewList = new CopyOnWriteArrayList<>();
     private HashMap<MathPoint, BrickView> pointViewHashMap = new HashMap<>();
 
     @Override
@@ -95,8 +99,34 @@ public class BrickActivity extends Activity implements IBrickView {
 
     @Override
     public void addBallView() {
-        ballView = new BallView(this);
+        BallView ballView = new BallView(this);
+        BallView ballView1 = new BallView(this);
+        BallView ballView2 = new BallView(this);
+        BallView ballView3 = new BallView(this);
+        BallView ballView4 = new BallView(this);
+        BallView ballView5 = new BallView(this);
+        BallView ballView6 = new BallView(this);
+        BallView ballView7 = new BallView(this);
+        BallView ballView8 = new BallView(this);
         flContainer.addView(ballView);
+        flContainer.addView(ballView1);
+        flContainer.addView(ballView2);
+        flContainer.addView(ballView3);
+        flContainer.addView(ballView4);
+        flContainer.addView(ballView5);
+        flContainer.addView(ballView6);
+        flContainer.addView(ballView7);
+        flContainer.addView(ballView8);
+
+        ballViewList.add(ballView);
+        ballViewList.add(ballView1);
+        ballViewList.add(ballView2);
+        ballViewList.add(ballView3);
+        ballViewList.add(ballView4);
+        ballViewList.add(ballView5);
+        ballViewList.add(ballView6);
+        ballViewList.add(ballView7);
+        ballViewList.add(ballView8);
     }
 
     @Override
@@ -109,8 +139,32 @@ public class BrickActivity extends Activity implements IBrickView {
     }
 
     @Override
-    public void updateBall(PointF pointF) {
-        ballView.setPointPosition(pointF);
+    public void updateBall(PointF pointF, final double angle, final float delta) {
+//        ballView.setPointPosition(pointF);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    for (BallView ballView : ballViewList) {
+                        Thread.sleep(64);
+                        ballView.startAutoMove(angle, delta, new IDirectionChangeListener() {
+                            @Override
+                            public boolean changeLR(boolean isRight, PointF pointF) {
+                                return brickPresenter.changeLR(isRight, pointF);
+                            }
+
+                            @Override
+                            public boolean changeTB(boolean isDown, PointF pointF) {
+                                return brickPresenter.changeTB(isDown, pointF);
+                            }
+                        });
+
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     @Override
@@ -123,8 +177,15 @@ public class BrickActivity extends Activity implements IBrickView {
         final BrickView brickView = pointViewHashMap.get(ballCrashEvent.getMathPoint());
         brickView.shining(new BrickView.ShiningListener() {
             @Override
-            public void remove(BrickView brickView) {
-                flContainer.removeView(brickView);
+            public void remove(final BrickView brickView) {
+                // README 不用post会报错Attempt to read from field 'int android.view.View.mViewFlags' on a null object
+                // reference
+                flContainer.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        flContainer.removeView(brickView);
+                    }
+                });
                 brickPresenter.removeBrick(brickView.getMathPoint());
             }
         });

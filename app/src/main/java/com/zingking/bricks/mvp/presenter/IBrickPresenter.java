@@ -1,5 +1,6 @@
 package com.zingking.bricks.mvp.presenter;
 
+import android.graphics.PointF;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -21,4 +22,8 @@ public interface IBrickPresenter {
     void onBackgroundTouch(View view, MotionEvent motionEvent);
 
     void removeBrick(MathPoint mathPoint);
+
+    boolean changeLR(boolean isRight, PointF pointF);
+
+    boolean changeTB(boolean isDown, PointF pointF);
 }

@@ -7,6 +7,7 @@ import android.view.View;
 
 import com.zingking.bricks.entity.BackgroundPosition;
 import com.zingking.bricks.entity.MathPoint;
+import com.zingking.bricks.listener.IDirectionChangeListener;
 import com.zingking.bricks.mvp.model.BrickModel;
 import com.zingking.bricks.mvp.view.IBrickView;
 import com.zingking.bricks.widget.BricksBackgroundView;
@@ -66,9 +67,9 @@ public class BrickPresenter implements IBrickPresenter {
     @Override
     public void onBackgroundTouch(View view, MotionEvent event) {
         Log.d(TAG, "dispatchTouchEvent() called with: event = [" + event + "]");
-        if (isDrawing) {
-            return;
-        }
+//        if (isDrawing) {
+//            return;
+//        }
         int action = event.getAction();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
@@ -85,7 +86,8 @@ public class BrickPresenter implements IBrickPresenter {
                 Log.i(TAG, "dispatchTouchEvent: 超界");
                 break;
             case MotionEvent.ACTION_UP:
-                    startAutoMove();
+                iBrickView.updateBall(new PointF(ballRadius, ballRadius), brickModel.getAngle(), delta);
+//                startAutoMove();
                 break;
             default:
                 break;
@@ -97,6 +99,16 @@ public class BrickPresenter implements IBrickPresenter {
         brickModel.removeMathPoint(mathPoint);
     }
 
+    @Override
+    public boolean changeLR(boolean isRight, PointF pointF) {
+        return brickModel.changeLR(isRight, pointF);
+    }
+
+    @Override
+    public boolean changeTB(boolean isDown, PointF pointF) {
+        return brickModel.changeTB(isDown, pointF);
+    }
+
     private void updateLine(boolean isStart, PointF pointF) {
         if (isStart) {
             brickModel.setLineStartPF(pointF);
@@ -106,8 +118,13 @@ public class BrickPresenter implements IBrickPresenter {
         iBrickView.updateLine(isStart, pointF);
     }
 
+    /**
+     * 小球移动方法已移到{@link com.zingking.bricks.widget.BallView#startAutoMove(double, float,
+     * IDirectionChangeListener)}中，不推荐此方法
+     */
+    @Deprecated
     private void startAutoMove() {
-        double angle = brickModel.getAngle();
+        final double angle = brickModel.getAngle();
         moveY = Math.sin(angle * Math.PI / 180) * delta;
         moveX = Math.cos(angle * Math.PI / 180) * delta;
         if (isDrawing) {
@@ -166,7 +183,7 @@ public class BrickPresenter implements IBrickPresenter {
                                 }
                             }
                             int[] ballPosition = brickModel.getBallPosition(pointF);
-                            iBrickView.updateBall(pointF);
+                            iBrickView.updateBall(pointF, angle, delta);
                             iBrickView.updateBallCoordinate(ballPosition);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
