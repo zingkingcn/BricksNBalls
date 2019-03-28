@@ -91,14 +91,17 @@ public class BrickModel {
 
     /**
      * 左右方向是否改变
+     *
+     * @param angle 发射线角度，绝对值
      */
-    public boolean changeLR(boolean isRight, PointF pointF) {
+    public boolean changeLR(boolean isRight, PointF pointF, double angle) {
         int[] ballPosition = getBallPosition(pointF);
         boolean result = false;
         for (MathPoint mathPoint : mathPointList) {
             RectF range = mathPoint.getRange();
             if (isRight) {
-                if (ballPosition[0] + 1 == mathPoint.getX() && ballPosition[1] == mathPoint.getY()) {
+                if ((ballPosition[0] + 1 == mathPoint.getX() && ballPosition[1] == mathPoint.getY())
+                        || (angle >= 43 && angle <= 48 && ballPosition[0] + 1 == mathPoint.getX() && ballPosition[1] + 1 == mathPoint.getY())) {
                     // 如果小球向右移动，当小球x坐标大于方块左侧，则表示需要改为向左移动
                     result = pointF.x + ballRadius >= range.left;
                     if (result) {
@@ -107,7 +110,8 @@ public class BrickModel {
                     break;
                 }
             } else {
-                if (ballPosition[0] - 1 == mathPoint.getX() && ballPosition[1] == mathPoint.getY()) {
+                if ((ballPosition[0] - 1 == mathPoint.getX() && ballPosition[1] == mathPoint.getY())
+                        || (angle >= 43 && angle <= 48 && ballPosition[0] - 1 == mathPoint.getX() && ballPosition[1] - 1 == mathPoint.getY())) {
                     // 如果小球向左移动，当小球x坐标小于方块右侧，则表示需要改为向向右移动
                     result = pointF.x - ballRadius <= range.right && pointF.x - ballRadius >= range.left;
                     if (result) {
@@ -163,25 +167,30 @@ public class BrickModel {
     /**
      * 上下方向是否改变
      */
-    public boolean changeTB(boolean isDown, PointF pointF) {
+    public boolean changeTB(boolean isDown, PointF pointF, double angle) {
         boolean result = false;
         int[] ballPosition = getBallPosition(pointF);
         for (MathPoint mathPoint : mathPointList) {
             RectF range = mathPoint.getRange();
             if (isDown) {
-                if (ballPosition[1] + 1 == mathPoint.getY() && ballPosition[0] == mathPoint.getX()) {
+                if ((ballPosition[1] + 1 == mathPoint.getY() && ballPosition[0] == mathPoint.getX())
+                        ||
+                        (angle >= 43 && angle <= 48 && ballPosition[1] + 1 == mathPoint.getY() && ballPosition[0] + 1 == mathPoint.getX())) {
                     // 如果小球向下移动，当小球y坐标大于方块上侧，则表示需要改为向上移动
                     result = pointF.y + ballRadius >= range.top;
                     if (result) {
                         EventBus.getDefault().post(new BallCrashEvent(mathPoint));
+                        break;
                     }
                 }
             } else {
-                if (ballPosition[1] - 1 == mathPoint.getY() && ballPosition[0] == mathPoint.getX()) {
+                if ((ballPosition[1] - 1 == mathPoint.getY() && ballPosition[0] == mathPoint.getX()) ||
+                        (angle >= 43 && angle <= 48 && ballPosition[1] - 1 == mathPoint.getY() && ballPosition[0] - 1 == mathPoint.getX())) {
                     // 如果小球向上移动，当小球y坐标小于方块下侧，则表示需要改为向向下移动
                     result = pointF.y - ballRadius <= range.bottom && pointF.y - ballRadius >= range.top;
                     if (result) {
                         EventBus.getDefault().post(new BallCrashEvent(mathPoint));
+                        break;
                     }
                 }
             }

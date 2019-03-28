@@ -10,7 +10,9 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 
+import com.zingking.bricks.App;
 import com.zingking.bricks.listener.IDirectionChangeListener;
+import com.zingking.bricks.utils.DensityUtil;
 
 /**
  * Copyright © 2018 www.zingking.cn All Rights Reserved.
@@ -23,7 +25,7 @@ import com.zingking.bricks.listener.IDirectionChangeListener;
 public class BallView extends View {
     private final float X = 20f;
     private final float Y = 20f;
-    private final float radius = 20f;
+    private final float radius = DensityUtil.dip2px(App.getAppContext(), 20f);
     /**
      * 小球的圆心
      */

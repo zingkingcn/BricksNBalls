@@ -100,13 +100,13 @@ public class BrickPresenter implements IBrickPresenter {
     }
 
     @Override
-    public boolean changeLR(boolean isRight, PointF pointF) {
-        return brickModel.changeLR(isRight, pointF);
+    public boolean changeLR(boolean isRight, PointF pointF, double angle) {
+        return brickModel.changeLR(isRight, pointF, Math.abs(angle));
     }
 
     @Override
-    public boolean changeTB(boolean isDown, PointF pointF) {
-        return brickModel.changeTB(isDown, pointF);
+    public boolean changeTB(boolean isDown, PointF pointF, double angle) {
+        return brickModel.changeTB(isDown, pointF, Math.abs(angle));
     }
 
     private void updateLine(boolean isStart, PointF pointF) {
@@ -154,8 +154,8 @@ public class BrickPresenter implements IBrickPresenter {
                                 }
                             }
                             Thread.sleep(2);
-                            boolean changeLR = brickModel.changeLR(isRight, pointF);
-                            boolean changeTB = brickModel.changeTB(isDown, pointF);
+                            boolean changeLR = brickModel.changeLR(isRight, pointF, Math.abs(angle));
+                            boolean changeTB = brickModel.changeTB(isDown, pointF, Math.abs(angle));
                             if (isRight) {
                                 if (changeLR) {
                                     isRight = false;
@@ -206,12 +206,12 @@ public class BrickPresenter implements IBrickPresenter {
         // 遍历砖块样式
         for (int yCoordinate = 0, yLen = brickPosition.length; yCoordinate < yLen; yCoordinate++) {
             if (yNum - 1 != yLen) {
-                Log.e(TAG, "drawBrickByLevel 关卡砖块有 " + yLen + " 行，砖块数据有 " + yNum + "组.");
+                Log.e(TAG, "drawBrickByLevel 关卡砖块有 " + yLen + " 行，砖块数据有 " + yNum + "组.数据应该比关卡多1");
                 continue;
             }
             int xLen = brickPosition[yCoordinate].length;
             if (xNum - 1 != xLen) {
-                Log.e(TAG, "drawBrickByLevel 关卡砖块有 " + xLen + " 列，砖块数据有 " + xNum + "组.");
+                Log.e(TAG, "drawBrickByLevel 关卡砖块有 " + xLen + " 列，砖块数据有 " + xNum + "组.数据应该比关卡多1");
                 continue;
             }
             for (int xCoordinate = 0; xCoordinate < xLen; xCoordinate++) {

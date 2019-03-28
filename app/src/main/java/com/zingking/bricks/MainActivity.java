@@ -45,6 +45,7 @@ public class MainActivity extends Activity {
     private BallView ballView;
     private LineView lineView;
     private List<MathPoint> mathPointList = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,16 +85,16 @@ public class MainActivity extends Activity {
                         currTouchY = 0;
                         float x = event.getX();
                         float y = event.getY();
-                        if (x >= 0 && x <= view.getWidth()){
+                        if (x >= 0 && x <= view.getWidth()) {
                             currTouchX = x;
                             lastTouchX = currTouchX;
-                        }else {
+                        } else {
                             currTouchX = lastTouchX;
                         }
                         if (y >= 0 && y <= view.getHeight()) {
                             currTouchY = y;
                             lastTouchY = currTouchY;
-                        }else {
+                        } else {
                             currTouchY = lastTouchY;
                         }
                         lineView.setLineStopPosition(new PointF(x, y));
@@ -104,16 +105,16 @@ public class MainActivity extends Activity {
                         }
                         x = event.getX();
                         y = event.getY();
-                        if (x >= 0 && x <= view.getWidth()){
+                        if (x >= 0 && x <= view.getWidth()) {
                             currTouchX = x;
                             lastTouchX = currTouchX;
-                        }else {
+                        } else {
                             currTouchX = lastTouchX;
                         }
                         if (y >= 0 && y <= view.getHeight()) {
                             currTouchY = y;
                             lastTouchY = currTouchY;
-                        }else {
+                        } else {
                             currTouchY = lastTouchY;
                         }
                         lineView.setLineStopPosition(new PointF(x, y));
@@ -128,7 +129,7 @@ public class MainActivity extends Activity {
                             PointF lineStartPosition = lineView.getLineStartPosition();
                             PointF lineStopPosition = lineView.getLineStopPosition();
                             angle = Math.atan((lineStopPosition.y - lineStartPosition.y) / ((double) (lineStopPosition
-                                    .x - lineStartPosition.x))) / Math.PI *180;
+                                    .x - lineStartPosition.x))) / Math.PI * 180;
                             startAutoMove();
                         }
                         break;
@@ -140,7 +141,7 @@ public class MainActivity extends Activity {
         });
         backgroundView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
-         backgroundView.setHorizontalNum(HORIZONTAL_NUM);
+        backgroundView.setHorizontalNum(HORIZONTAL_NUM);
 //        backgroundView.setVerticalNum(VERTICAL_NUM);
         backgroundView.setPadding(PADDING);
         lineView = new LineView(this);
@@ -191,10 +192,10 @@ public class MainActivity extends Activity {
                                 }
                             }
                             Thread.sleep(2);
-                            if (isRight){
+                            if (isRight) {
                                 if (!changeLR(pointF)) {
                                     pointF.x += moveX;
-                                }else {
+                                } else {
                                     isRight = false;
                                 }
                             } else {
@@ -248,12 +249,12 @@ public class MainActivity extends Activity {
         // 遍历砖块样式
         for (int yCoordinate = 0, yLen = brickPosition.length; yCoordinate < yLen; yCoordinate++) {
             if (yNum - 1 != yLen) {
-                Log.e(TAG, "drawBrickByLevel 砖块有 " + yLen + " 行，砖块数据有 " + yNum + "组.");
+                Log.e(TAG, "drawBrickByLevel 关卡砖块有 " + yLen + " 行，砖块数据有 " + yNum + "组.数据应该比关卡多1");
                 continue;
             }
             int xLen = brickPosition[yCoordinate].length;
             if (xNum - 1 != xLen) {
-                Log.e(TAG, "drawBrickByLevel 砖块有 " + xLen + " 列，砖块数据有 " + xNum + "组.");
+                Log.e(TAG, "drawBrickByLevel 关卡砖块有 " + xLen + " 列，砖块数据有 " + xNum + "组.数据应该比关卡多1");
                 continue;
             }
             for (int xCoordinate = 0; xCoordinate < xLen; xCoordinate++) {
@@ -272,7 +273,7 @@ public class MainActivity extends Activity {
         lineView.bringToFront();
     }
 
-        // 遍历数据，竖着画(先遍历xPositions)
+    // 遍历数据，竖着画(先遍历xPositions)
 //        for (int xCoordinate = 0, xLen = xPositions.length - 1; xCoordinate < xLen; xCoordinate++) {
 //            for (int yCoordinate = 0, yLen = yPositions.length - 1; yCoordinate < yLen; yCoordinate++) {
 //                // 第 yCoordinate 行，第 xCoordinate 列
@@ -286,7 +287,7 @@ public class MainActivity extends Activity {
 //            }
 //        }
 
-    private void drawBrickByRandom(){
+    private void drawBrickByRandom() {
         pointXList.clear();
         pointYList.clear();
         flContainer.removeAllViews();
@@ -325,7 +326,7 @@ public class MainActivity extends Activity {
 
     public void btnClick(View view) {
         int id = view.getId();
-        switch (id){
+        switch (id) {
             case R.id.btn_change:
                 drawBrickByRandom();
                 break;
@@ -346,7 +347,7 @@ public class MainActivity extends Activity {
         for (MathPoint mathPoint : mathPointList) {
             RectF range = mathPoint.getRange();
             if (isRight) {
-                if (ballPosition[0] + 1 == mathPoint.getX()&& ballPosition[1] == mathPoint.getY()) {
+                if (ballPosition[0] + 1 == mathPoint.getX() && ballPosition[1] == mathPoint.getY()) {
                     // 如果小球向右移动，当小球x坐标大于方块左侧，则表示需要改为向左移动
                     result = pointF.x + ballRadius >= range.left;
                     break;
@@ -361,9 +362,9 @@ public class MainActivity extends Activity {
         }
         // 如果未发生碰撞则检测边缘
         if (!result) {
-            if(isRight){
+            if (isRight) {
                 result = pointF.x + ballRadius >= backgroundView.getWidth();
-            }else {
+            } else {
                 result = pointF.x - ballRadius < 0;
             }
         }
@@ -379,7 +380,7 @@ public class MainActivity extends Activity {
         for (MathPoint mathPoint : mathPointList) {
             RectF range = mathPoint.getRange();
             if (isDown) {
-                if (ballPosition[1] + 1 == mathPoint.getY()&& ballPosition[0] == mathPoint.getX()) {
+                if (ballPosition[1] + 1 == mathPoint.getY() && ballPosition[0] == mathPoint.getX()) {
                     // 如果小球向下移动，当小球y坐标大于方块上侧，则表示需要改为向上移动
                     result = pointF.y + ballRadius >= range.top;
                 }
@@ -392,9 +393,9 @@ public class MainActivity extends Activity {
         }
         // 如果未发生碰撞则检测边缘
         if (!result) {
-            if(isDown){
+            if (isDown) {
                 result = pointF.y + ballRadius >= backgroundView.getHeight();
-            }else {
+            } else {
                 result = pointF.y - ballRadius < 0;
             }
         }
@@ -406,16 +407,16 @@ public class MainActivity extends Activity {
         final float[] yPositions = backgroundView.getYPositions();// y轴点的数量和 行位置参数
         int xCoordinate = -1;
         int yCoordinate = -1;
-        if (pointF.x<xPositions[0]){
+        if (pointF.x < xPositions[0]) {
             xCoordinate = -1;
         } else if (pointF.x > xPositions[xPositions.length - 1]) {
-            xCoordinate = xPositions.length -1;
+            xCoordinate = xPositions.length - 1;
         }
 
-        if (pointF.y<yPositions[0]){
+        if (pointF.y < yPositions[0]) {
             yCoordinate = -1;
         } else if (pointF.y > yPositions[yPositions.length - 1]) {
-            yCoordinate = yPositions.length -1;
+            yCoordinate = yPositions.length - 1;
         }
 
         for (int i = 0, len = xPositions.length - 1; i < len; i++) {

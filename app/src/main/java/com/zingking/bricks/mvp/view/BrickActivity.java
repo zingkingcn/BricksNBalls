@@ -3,6 +3,7 @@ package com.zingking.bricks.mvp.view;
 import android.app.Activity;
 import android.graphics.PointF;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -138,8 +139,12 @@ public class BrickActivity extends Activity implements IBrickView {
         }
     }
 
+    private static final String TAG = "BrickActivity";
+
     @Override
     public void updateBall(PointF pointF, final double angle, final float delta) {
+        Log.d(TAG, "updateBall() called with: pointF = [" + pointF + "], angle = [" + angle + "], delta = [" + delta + "]");
+
 //        ballView.setPointPosition(pointF);
         new Thread(new Runnable() {
             @Override
@@ -150,12 +155,12 @@ public class BrickActivity extends Activity implements IBrickView {
                         ballView.startAutoMove(angle, delta, new IDirectionChangeListener() {
                             @Override
                             public boolean changeLR(boolean isRight, PointF pointF) {
-                                return brickPresenter.changeLR(isRight, pointF);
+                                return brickPresenter.changeLR(isRight, pointF, angle);
                             }
 
                             @Override
                             public boolean changeTB(boolean isDown, PointF pointF) {
-                                return brickPresenter.changeTB(isDown, pointF);
+                                return brickPresenter.changeTB(isDown, pointF, angle);
                             }
                         });
 
