@@ -7,7 +7,7 @@ import android.view.View;
 
 import com.zingking.bricks.entity.BackgroundPosition;
 import com.zingking.bricks.entity.MathPoint;
-import com.zingking.bricks.listener.IDirectionChangeListener;
+import com.zingking.bricks.listener.IBallMoveListener;
 import com.zingking.bricks.mvp.model.BrickModel;
 import com.zingking.bricks.mvp.view.IBrickView;
 import com.zingking.bricks.widget.BricksBackgroundView;
@@ -120,7 +120,7 @@ public class BrickPresenter implements IBrickPresenter {
 
     /**
      * 小球移动方法已移到{@link com.zingking.bricks.widget.BallView#startAutoMove(double, float,
-     * IDirectionChangeListener)}中，不推荐此方法
+     * IBallMoveListener)}中，不推荐此方法
      */
     @Deprecated
     private void startAutoMove() {

@@ -12,7 +12,7 @@ import android.widget.FrameLayout;
 import com.zingking.bricks.R;
 import com.zingking.bricks.entity.MathPoint;
 import com.zingking.bricks.event.BallCrashEvent;
-import com.zingking.bricks.listener.IDirectionChangeListener;
+import com.zingking.bricks.listener.IBallMoveListener;
 import com.zingking.bricks.mvp.presenter.BrickPresenter;
 import com.zingking.bricks.widget.BallView;
 import com.zingking.bricks.widget.BrickView;
@@ -23,8 +23,12 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class BrickActivity extends Activity implements IBrickView {
 
@@ -40,11 +44,15 @@ public class BrickActivity extends Activity implements IBrickView {
     // README 遍历的时候用List会报ConcurrentModificationException
     private CopyOnWriteArrayList<BallView> ballViewList = new CopyOnWriteArrayList<>();
     private HashMap<MathPoint, BrickView> pointViewHashMap = new HashMap<>();
+    private ExecutorService threadPool;
+    private final List<PointF> endBallPosition = new ArrayList<>();
+    private final int BALL_NUM = 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_brick);
+        threadPool = Executors.newCachedThreadPool();
         EventBus.getDefault().register(this);
         initView();
         brickPresenter = new BrickPresenter(this);
@@ -100,34 +108,11 @@ public class BrickActivity extends Activity implements IBrickView {
 
     @Override
     public void addBallView() {
-        BallView ballView = new BallView(this);
-        BallView ballView1 = new BallView(this);
-        BallView ballView2 = new BallView(this);
-        BallView ballView3 = new BallView(this);
-        BallView ballView4 = new BallView(this);
-        BallView ballView5 = new BallView(this);
-        BallView ballView6 = new BallView(this);
-        BallView ballView7 = new BallView(this);
-        BallView ballView8 = new BallView(this);
-        flContainer.addView(ballView);
-        flContainer.addView(ballView1);
-        flContainer.addView(ballView2);
-        flContainer.addView(ballView3);
-        flContainer.addView(ballView4);
-        flContainer.addView(ballView5);
-        flContainer.addView(ballView6);
-        flContainer.addView(ballView7);
-        flContainer.addView(ballView8);
-
-        ballViewList.add(ballView);
-        ballViewList.add(ballView1);
-        ballViewList.add(ballView2);
-        ballViewList.add(ballView3);
-        ballViewList.add(ballView4);
-        ballViewList.add(ballView5);
-        ballViewList.add(ballView6);
-        ballViewList.add(ballView7);
-        ballViewList.add(ballView8);
+        for (int i = 0; i < BALL_NUM; i++) {
+            BallView ballView = new BallView(this);
+            flContainer.addView(ballView);
+            ballViewList.add(ballView);
+        }
     }
 
     @Override
@@ -144,22 +129,37 @@ public class BrickActivity extends Activity implements IBrickView {
     @Override
     public void updateBall(PointF pointF, final double angle, final float delta) {
         Log.d(TAG, "updateBall() called with: pointF = [" + pointF + "], angle = [" + angle + "], delta = [" + delta + "]");
-
 //        ballView.setPointPosition(pointF);
-        new Thread(new Runnable() {
+        threadPool.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    for (BallView ballView : ballViewList) {
+                    for (final BallView ballView : ballViewList) {
                         Thread.sleep(64);
-                        ballView.startAutoMove(angle, delta, new IDirectionChangeListener() {
+                        ballView.startAutoMove(angle, delta, new IBallMoveListener() {
                             @Override
-                            public boolean changeLR(boolean isRight, PointF pointF) {
+                            public void moveEnd(PointF ballPosition) {
+                                PointF firstPoint = null;
+                                synchronized (endBallPosition) {
+                                    endBallPosition.add(ballPosition);
+                                    firstPoint = endBallPosition.get(0);
+                                    if (endBallPosition.size() == BALL_NUM) {
+                                        endBallPosition.clear();
+                                    }
+                                }
+                                if (firstPoint != null && !firstPoint.equals(ballPosition)) {
+                                    ballView.moveEndPosition(firstPoint);
+                                }
+                                Log.i(TAG, "moveEnd() called with: ballPosition = [" + ballPosition + "]");
+                            }
+
+                            @Override
+                            public boolean changeLR(boolean isRight, PointF pointF, double angle) {
                                 return brickPresenter.changeLR(isRight, pointF, angle);
                             }
 
                             @Override
-                            public boolean changeTB(boolean isDown, PointF pointF) {
+                            public boolean changeTB(boolean isDown, PointF pointF, double angle) {
                                 return brickPresenter.changeTB(isDown, pointF, angle);
                             }
                         });
@@ -169,7 +169,7 @@ public class BrickActivity extends Activity implements IBrickView {
                     e.printStackTrace();
                 }
             }
-        }).start();
+        });
     }
 
     @Override
