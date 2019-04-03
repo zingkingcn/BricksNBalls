@@ -1,5 +1,6 @@
 package com.zingking.bricks.mvp.presenter;
 
+import android.graphics.PointF;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -22,5 +23,9 @@ public interface IBrickPresenter extends IDirectionListener {
     void onBackgroundTouch(View view, MotionEvent motionEvent);
 
     void removeBrick(MathPoint mathPoint);
+
+    void updateLine(boolean isStart, PointF pointF);
+
+    void allBallEnded(boolean ended);
 
 }

@@ -24,6 +24,10 @@ public class BrickPresenter implements IBrickPresenter {
     private final Object object = new Object();
     private final BrickModel brickModel;
     private boolean isDrawing = false;
+    /**
+     * 所有小球都回到起点
+     */
+    private boolean allBallEnded = true;
     private double moveY = 0;
     private double moveX = 0;
     /**
@@ -67,9 +71,9 @@ public class BrickPresenter implements IBrickPresenter {
     @Override
     public void onBackgroundTouch(View view, MotionEvent event) {
         Log.d(TAG, "dispatchTouchEvent() called with: event = [" + event + "]");
-//        if (isDrawing) {
-//            return;
-//        }
+        if (!allBallEnded) {// 如果小球有一个未结束则不处理
+            return;
+        }
         int action = event.getAction();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
@@ -100,6 +104,11 @@ public class BrickPresenter implements IBrickPresenter {
     }
 
     @Override
+    public void allBallEnded(boolean ended) {
+        allBallEnded = ended;
+    }
+
+    @Override
     public boolean changeLR(boolean isRight, PointF pointF, double angle) {
         return brickModel.changeLR(isRight, pointF, Math.abs(angle));
     }
@@ -109,7 +118,8 @@ public class BrickPresenter implements IBrickPresenter {
         return brickModel.changeTB(isDown, pointF, Math.abs(angle));
     }
 
-    private void updateLine(boolean isStart, PointF pointF) {
+    @Override
+    public void updateLine(boolean isStart, PointF pointF) {
         if (isStart) {
             brickModel.setLineStartPF(pointF);
         } else {

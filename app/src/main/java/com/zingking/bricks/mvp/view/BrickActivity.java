@@ -134,6 +134,7 @@ public class BrickActivity extends Activity implements IBrickView {
             @Override
             public void run() {
                 try {
+                    brickPresenter.allBallEnded(false);
                     for (final BallView ballView : ballViewList) {
                         Thread.sleep(64);
                         ballView.startAutoMove(angle, delta, new IBallMoveListener() {
@@ -145,7 +146,11 @@ public class BrickActivity extends Activity implements IBrickView {
                                     firstPoint = endBallPosition.get(0);
                                     if (endBallPosition.size() == BALL_NUM) {
                                         endBallPosition.clear();
+                                        brickPresenter.allBallEnded(true);
                                     }
+                                }
+                                if (firstPoint !=null){
+                                    brickPresenter.updateLine(true, firstPoint);
                                 }
                                 if (firstPoint != null && !firstPoint.equals(ballPosition)) {
                                     ballView.moveEndPosition(firstPoint);

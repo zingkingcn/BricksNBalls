@@ -24,8 +24,8 @@ import com.zingking.bricks.utils.DensityUtil;
 
 public class BallView extends View {
     private static final String TAG = "BallView";
-    private final float X = 20f;
-    private final float Y = 20f;
+    private final float X = DensityUtil.dip2px(App.getAppContext(), 20f);
+    private final float Y = DensityUtil.dip2px(App.getAppContext(), 20f);
     private final float radius = DensityUtil.dip2px(App.getAppContext(), 20f);
     /**
      * 小球的圆心
