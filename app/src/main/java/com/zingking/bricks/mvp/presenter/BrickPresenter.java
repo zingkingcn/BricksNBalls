@@ -57,8 +57,8 @@ public class BrickPresenter implements IBrickPresenter {
                 brickModel.createLevel();
                 brickModel.setBackgroundPosition(position);
                 drawBrickByLevel(position.getXPositions(), position.getYPositions());
-                iBrickView.addLineView();
                 iBrickView.addBallView();
+                iBrickView.addLineView();
             }
 
             @Override

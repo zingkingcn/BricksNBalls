@@ -27,6 +27,7 @@ public class BallView extends View {
     private final float X = DensityUtil.dip2px(App.getAppContext(), 20f);
     private final float Y = DensityUtil.dip2px(App.getAppContext(), 20f);
     private final float radius = DensityUtil.dip2px(App.getAppContext(), 20f);
+    private int ballSpeed = 1;
     /**
      * 小球的圆心
      */
@@ -110,35 +111,38 @@ public class BallView extends View {
             return;
         }
         final PointF pointF = pointPosition;
-        boolean changeLR = changeListener.changeLR(isRight, pointF, angle);
-        boolean changeTB = changeListener.changeTB(isDown, pointF, angle);
-        if (isRight) {
-            if (changeLR) {
-                isRight = false;
+        for (int i = 0; i < ballSpeed; i++) {
+            boolean changeLR = changeListener.changeLR(isRight, pointF, angle);
+            boolean changeTB = changeListener.changeTB(isDown, pointF, angle);
+            if (isRight) {
+                if (changeLR) {
+                    isRight = false;
+                } else {
+                    pointF.x += moveX;
+                }
             } else {
-                pointF.x += moveX;
+                if (changeLR) {
+                    isRight = true;
+                } else {
+                    pointF.x -= moveX;
+                }
             }
-        } else {
-            if (changeLR) {
-                isRight = true;
+            if (isDown) {
+                if (changeTB) {
+                    isDown = false;
+                } else {
+                    pointF.y += moveY;
+                }
             } else {
-                pointF.x -= moveX;
+                if (changeTB) {
+                    isDown = true;
+                } else {
+                    pointF.y -= moveY;
+                }
             }
+            pointPosition.set(pointF);
+            postInvalidate();
         }
-        if (isDown) {
-            if (changeTB) {
-                isDown = false;
-            } else {
-                pointF.y += moveY;
-            }
-        } else {
-            if (changeTB) {
-                isDown = true;
-            } else {
-                pointF.y -= moveY;
-            }
-        }
-        pointPosition.set(pointF);
         Log.i(TAG, "run: pointF =  " + pointF.toString());
         if (pointF.y - radius < 0) {
             pointF.y = radius;
