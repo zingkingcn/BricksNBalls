@@ -8,13 +8,20 @@ import android.graphics.RectF;
  * @author Z.kai
  * @date 2018/12/24
  * @description 数学坐标系中的点的表示，例如  (0,1) (-2,-2)d等
- * <p>这里表示方块的位置，左上角为 (0,0)，往右为正，往下为正
- * </p>
+ * <p>这里表示方块的位置，左上角为 (0,0)，往右为正，往下为正</p>
  */
-
 public class MathPoint {
+    /**
+     * x轴坐标
+     */
     private int x = Integer.MAX_VALUE;
+    /**
+     * y轴坐标
+     */
     private int y = Integer.MAX_VALUE;
+    /**
+     * 当前砖块的位置参数
+     */
     private RectF range = new RectF(0, 0, 0, 0);
 
     public MathPoint(int x, int y) {

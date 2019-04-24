@@ -5,7 +5,7 @@ package com.zingking.bricks.entity;
  *
  * @author Z.kai
  * @date 2019/3/14
- * @description
+ * @description 背景分割线参数，用于绘制砖块和检测碰撞等
  */
 public class BackgroundPosition {
     /**
@@ -16,7 +16,13 @@ public class BackgroundPosition {
      * y轴点的数量和 行位置参数
      */
     private float[] yPositions;
+    /**
+     * 背景宽度，约等于xPositions的最大值
+     */
     private int width;
+    /**
+     * 背景高度，约等于yPositions的最大值
+     */
     private int height;
 
     public BackgroundPosition() {

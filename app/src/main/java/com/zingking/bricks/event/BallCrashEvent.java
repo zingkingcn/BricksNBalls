@@ -7,7 +7,7 @@ import com.zingking.bricks.entity.MathPoint;
  *
  * @author Z.kai
  * @date 2019/3/14
- * @description 小球碰撞事件
+ * @description EventBus 小球碰撞事件
  */
 public class BallCrashEvent {
     /**

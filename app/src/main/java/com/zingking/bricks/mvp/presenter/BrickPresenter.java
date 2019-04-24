@@ -28,20 +28,35 @@ public class BrickPresenter implements IBrickPresenter {
      * 所有小球都回到起点
      */
     private boolean allBallEnded = true;
+    /**
+     * 小球每次更新位置y轴移动的距离，根据角度和三角函数计算
+     */
     private double moveY = 0;
     private double moveX = 0;
     /**
-     * 小球每次移动的距离
+     * 小球每次移动的距离，三角函数中斜边值
      */
     private float delta = 10f;
+    /**
+     * 小球半径
+     */
     private float ballRadius = 20f;
     private IBrickView iBrickView;
     /**
      * 计算小球移动的线程
      */
     private Thread ballMoveThread;
+    /**
+     * 小球移动线程{@link BrickPresenter#ballMoveThread}的标记变量
+     */
     private boolean isRun = false;
+    /**
+     * 小球向右移动
+     */
     private boolean isRight = true;
+    /**
+     * 小球向下移动
+     */
     private boolean isDown = true;
 
     public BrickPresenter(IBrickView iBrickView) {

@@ -20,6 +20,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @description
  */
 public class BrickModel {
+    /**
+     * 小球半径
+     */
     float ballRadius = 20f;
     /**
      * 整个关卡砖块布局
@@ -31,11 +34,11 @@ public class BrickModel {
     // README 用list会报ConcurrentModificationException
     private CopyOnWriteArrayList<MathPoint> mathPointList = new CopyOnWriteArrayList<>();
     /**
-     * 发射线的起点位置
+     * 发射线的起点位置，用于计算角度
      */
     private PointF lineStartPF = new PointF(0, 0);
     /**
-     * 发射线的终点位置
+     * 发射线的终点位置，用于计算角度
      */
     private PointF lineStopPF = new PointF(0, 0);
     /**
@@ -43,7 +46,7 @@ public class BrickModel {
      */
     private double angle = 0;
     /**
-     * 这个背景的位置信息
+     * 整个背景的位置信息
      */
     private BackgroundPosition backgroundPosition;
 
@@ -134,6 +137,11 @@ public class BrickModel {
         return result;
     }
 
+    /**
+     * 根据小球圆心坐标计算小球在数学坐标系中的点
+     * @param pointF 小球圆心真实坐标点
+     * @return 小球在数学坐标系中的位置，例如(2,2)
+     */
     public int[] getBallPosition(PointF pointF) {
         final float[] xPositions = backgroundPosition.getXPositions();// x轴点的数量和 列位置参数(数组长度为数量，值为位置参数)
         final float[] yPositions = backgroundPosition.getYPositions();// y轴点的数量和 行位置参数
